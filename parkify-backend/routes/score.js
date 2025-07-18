@@ -53,4 +53,22 @@ router.post("/add", async (req, res) => {
 });
 
 
+// In routes/score.js - add a new route
+router.get("/user/:email", async (req, res) => {
+  try {
+    const userScores = await Score.aggregate([
+      { $match: { email: req.params.email } },
+      { $group: { _id: "$email", totalScore: { $sum: "$score" } } }
+    ]);
+
+    if (userScores.length === 0) {
+      return res.json({ totalScore: 0 });
+    }
+
+    res.json(userScores[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching user scores" });
+  }
+});
+
 module.exports = router;

@@ -294,25 +294,33 @@ router.post("/cashout", async (req, res) => {
     const pointsPerDollar = 100; // 100 points = $1
     const pointsRequired = amountNum * pointsPerDollar;
 
-    if (user.score < pointsRequired) {
+    // Get user's total points from Score collection
+    const scores = await Score.aggregate([
+      { $match: { email: user.email } },
+      { $group: { _id: null, total: { $sum: "$score" } } }
+    ]);
+
+    const totalPoints = scores.length > 0 ? scores[0].total : 0;
+
+    if (totalPoints < pointsRequired) {
       return res.status(400).json({ message: "Insufficient points for cash-out" });
     }
 
-    if (amountNum < 10) {
-      return res.status(400).json({ message: "Minimum cash-out amount is $10" });
+    if (amountNum < 1) {
+      return res.status(400).json({ message: "Minimum cash-out amount is $1" });
     }
 
-    // Deduct points and add to balance (for simplicity, assume balance is updated after external processing)
-    user.score -= pointsRequired;
-    user.balance += amountNum; // Temporary balance update (in real app, this would be handled after payment confirmation)
-    await user.save();
+    // In a real app, you would:
+    // 1. Deduct points from user's total
+    // 2. Process payment to bank account
+    // For simulation, we'll just return success
 
-    // In a real app, integrate with PayPal or bank transfer API here
     res.status(200).json({
       message: "Cash-out request processed successfully",
       data: {
-        newPoints: user.score,
-        newBalance: user.balance,
+        pointsDeducted: pointsRequired,
+        newPointsBalance: totalPoints - pointsRequired,
+        amountTransferred: amountNum
       },
     });
   } catch (err) {
