@@ -17,7 +17,7 @@ import MapClickCloser from './component/MapClickCloser';
 import ParkingTimer from './component/ParkingTimer';
 import { handleStripePayment } from './component/stripePayment';
 import { isUserNearby } from './component/distance';
-import { MdWarning } from 'react-icons/md';
+
 
 const blueIcon = new L.Icon({
   iconUrl: availableIcon,
@@ -56,7 +56,7 @@ const ParkingSpots = () => {
   const [inputVisible, setInputVisible] = useState({});
   const [freeCounts, setFreeCounts] = useState({});
   const [parkedSpotId, setParkedSpotId] = useState(null);
-  const [isProfileComplete, setIsProfileComplete] = useState(true);
+
   const location = useLocation();
   const navigate = useNavigate();
   const [lastAction, setLastAction] = useState({});
@@ -67,30 +67,6 @@ const ParkingSpots = () => {
 
   const query = new URLSearchParams(useLocation().search);
   const selectedArea = query.get('location') || 'All';
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios
-        .get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          const user = res.data;
-          const isComplete = user.phoneNumber && user.vehicleNumber;
-          setIsProfileComplete(isComplete);
-          if (!isComplete) {
-            localStorage.setItem('returnTo', location.pathname + location.search);
-          }
-        })
-        .catch((err) => {
-          console.error('Error fetching profile:', err);
-          navigate('/login');
-        });
-    } else {
-      navigate('/login');
-    }
-  }, [navigate, location]);
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
@@ -235,27 +211,6 @@ const ParkingSpots = () => {
           <h2>Parking Spots in {selectedArea}</h2>
         </div>
       </header>
-
-      {!isProfileComplete && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            backgroundColor: '#f44336',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '8px',
-            margin: '10px 0',
-            cursor: 'pointer',
-          }}
-          onClick={() => navigate('/profile')}
-        >
-          <MdWarning size={24} />
-          <span>Your profile is incomplete. Please complete it to interact with parking spots.</span>
-        </div>
-      )}
 
       <div
         style={{
@@ -465,14 +420,11 @@ const ParkingSpots = () => {
                           {!freeCounts[spot._id + '_confirmed'] ? (
                             <button
                               disabled={
-                                !isProfileComplete ||  (!!parkedSpotId && parkedSpotId !== spot._id)
+                                !!parkedSpotId && parkedSpotId !== spot._id
                               }
                               onClick={async () => {
                                 
-                                if (!isProfileComplete) {
-                                  navigate('/profile');
-                                  return;
-                                }
+                                if (!!parkedSpotId && parkedSpotId !== spot._id) return;
                                 
                                 try {
                                   await axios.put(
@@ -503,7 +455,7 @@ const ParkingSpots = () => {
                               style={{
                                 width: '100%',
                                 backgroundColor:
-                                  !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id) ? '#ccc' : '#4CAF50',
+                                  !!parkedSpotId && parkedSpotId !== spot._id ? '#ccc' : '#4CAF50',
                                 color: 'white',
                                 padding: '8px',
                                 border: 'none',
@@ -511,7 +463,7 @@ const ParkingSpots = () => {
                                 fontWeight: 'bold',
                                 marginTop: '6px',
                                 cursor:
-                                  !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
+                                  !!parkedSpotId && parkedSpotId !== spot._id
                                     ? 'not-allowed'
                                     : 'pointer',
                               }}
@@ -541,15 +493,9 @@ const ParkingSpots = () => {
                                 }}
                               />
                               <button
-                                disabled={
-                                  !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
-                                }
+                                disabled={!!parkedSpotId && parkedSpotId !== spot._id}
                                 onClick={() => {
 
-                                  if (!isProfileComplete) {
-                                    navigate('/profile');
-                                    return;
-                                  }
 
                                   if (!!parkedSpotId && parkedSpotId !== spot._id) return;
                                   handleReportSubmit(spot._id);
@@ -557,7 +503,7 @@ const ParkingSpots = () => {
                                 style={{
                                   width: '100%',
                                   backgroundColor:
-                                    !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
+                                    !!parkedSpotId && parkedSpotId !== spot._id
                                       ? '#ccc'
                                       : '#007bff',
                                   color: 'white',
@@ -566,7 +512,7 @@ const ParkingSpots = () => {
                                   borderRadius: '4px',
                                   fontWeight: 'bold',
                                   cursor:
-                                    !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
+                                    !!parkedSpotId && parkedSpotId !== spot._id
                                       ? 'not-allowed'
                                       : 'pointer',
                                 }}
@@ -596,15 +542,8 @@ const ParkingSpots = () => {
                             }}
                           />
                           <button
-                            disabled={
-                              !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
-                            }
+                            disabled={!!parkedSpotId && parkedSpotId !== spot._id}
                             onClick={() => {
-                              
-                              if (!isProfileComplete) {
-                                navigate('/profile');
-                                return;
-                              }
                               
                               if (!!parkedSpotId && parkedSpotId !== spot._id) return;
                               handleReportSubmit(spot._id);
@@ -612,7 +551,7 @@ const ParkingSpots = () => {
                             style={{
                               width: '100%',
                               backgroundColor:
-                                !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id) ? 
+                                !!parkedSpotId && parkedSpotId !== spot._id ? 
                                 '#ccc' : '#007bff',
                               color: 'white',
                               padding: '8px',
@@ -621,7 +560,7 @@ const ParkingSpots = () => {
                               fontWeight: 'bold',
                               marginBottom: '6px',
                               cursor:
-                                !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
+                                !!parkedSpotId && parkedSpotId !== spot._id
                                   ? 'not-allowed'
                                   : 'pointer',
                             }}
@@ -634,15 +573,9 @@ const ParkingSpots = () => {
                             <>
                               <p style={{ marginTop: '10px' }}>Is this lot full?</p>
                               <button
-                                disabled={
-                                  !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
-                                }
+                                disabled={!!parkedSpotId && parkedSpotId !== spot._id}
+                                
                                 onClick={async () => {
-
-                                  if (!isProfileComplete) {
-                                    navigate('/profile');
-                                    return;
-                                  }
 
                                   if (!!parkedSpotId && parkedSpotId !== spot._id) return;
                                   try {
@@ -669,7 +602,7 @@ const ParkingSpots = () => {
                                 style={{
                                   width: '100%',
                                   backgroundColor:
-                                    !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
+                                    !!parkedSpotId && parkedSpotId !== spot._id
                                       ? '#ccc'
                                       : '#d32f2f',
                                   color: 'white',
@@ -678,7 +611,7 @@ const ParkingSpots = () => {
                                   borderRadius: '4px',
                                   fontWeight: 'bold',
                                   cursor:
-                                    !isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)
+                                    !!parkedSpotId && parkedSpotId !== spot._id
                                       ? 'not-allowed'
                                       : 'pointer',
                                 }}
@@ -782,20 +715,15 @@ const ParkingSpots = () => {
                     <strong>Are you parking here?</strong>
                     {spot.hasSpots ? (
                       <button
-                      disabled={!isProfileComplete || parkedSpotId}
+                      
                         onClick={async () => {
-
-                          if (!isProfileComplete) {
-                            navigate('/profile');
-                            return;
-                          }
-
                           await handleStripePayment(spot);
                           submitPoints(2, 'parking_confirmed');
                         }}
                         
+                        disabled={!!parkedSpotId && parkedSpotId !== spot._id}
                         style={{
-                          backgroundColor: !isProfileComplete || parkedSpotId ? '#ccc' : '#4CAF50',
+                          backgroundColor: '#4CAF50',
                           color: 'white',
                           padding: '6px 10px',
                           border: 'none',
