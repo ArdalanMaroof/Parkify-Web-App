@@ -1,59 +1,11 @@
 
-/* Wallet Container */
-.wallet-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  height: 100vh;
-  padding: 0 16px;
-  background-image: url('/profile.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  color: white;
-  text-align: center;
-  margin: 0 auto;
-  box-sizing: border-box;
-  overflow: hidden;
-  width: 100%;
-  max-width: 425px;
-  position: relative;
-}
-
-/* Dark overlay over background */
-.wallet-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 1;
-}
-
-/* Inner scrollable content wrapper */
-.wallet-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-top: 20px;
-  padding-bottom: 100px; /* Space for navbar */
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 2;
-}
-
 /* Logo */
 .logo {
   width: 110px;
   margin: 1rem auto;
   z-index: 2;
 }
+
 
 /* Heading */
 h2 {

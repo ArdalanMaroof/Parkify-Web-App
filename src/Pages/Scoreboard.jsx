@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './Scoreboard.css';
 import { useNavigate } from 'react-router-dom';
 import { MdArrowBack } from 'react-icons/md';
 import BottomNav from './component/BottomNav';
@@ -23,12 +22,8 @@ export default function Scoreboard() {
   }, []);
 
   return (
-    <div className="scoreboard-container">
+    <div className="scoreboard-container ">
       <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
-
-      <div className="back-arrow" onClick={() => navigate('/home')}>
-        <MdArrowBack size={28} color="white" />
-      </div>
 
       <h2>🏆 Top Parkify Users</h2>
 

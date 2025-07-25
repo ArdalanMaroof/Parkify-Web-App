@@ -1,13 +1,10 @@
 /* Main Container */
 .start-container {
-  background-color: #000;
-  color: white;
-  min-height: 100vh;
-  padding: 1.5rem 1rem 6rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  background: linear-gradient(135deg, var(--bg-color) 0%, var(--bg-page) 100%);
+  color: var(--text-color);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+  min-width: 420px;
 }
 
 /* Logo */
@@ -22,7 +19,59 @@
   font-size: 28px;
   margin-bottom: 0.5rem;
 }
+.logo:hover {
+  transform: scale(1.05);
+}
+/* Theme Switch Styling */
+.theme-switch {
+  position: absolute;
+  top: 1px;
+  right: 16px;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  z-index: 10;
+}
 
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 26px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+input:checked + .slider {
+  background: linear-gradient(135deg, var(--btn-bg), var(--btn-outline-border));
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
 .subtitle {
   font-size: 16px;
   margin-bottom: 1rem;
@@ -43,13 +92,13 @@
   border: none;
   outline: none;
   padding: 6px 12px;
-  width: 80%;              /* tighter width */
-  max-width: 200px;        /* much smaller max */
-  font-size: 13px;         /* smaller font */
+  width: 80%;              
+  max-width: 200px;        
+  font-size: 13px;         
   color: black;
   background-color: white;
-  border-radius: 25px;     /* slightly reduced curve */
-  height: 38px;            /* shorter height */
+  border-radius: 25px;     
+  height: 38px;           
   appearance: none;
   text-align: center;
   font-family: 'Poppins', sans-serif;
@@ -57,97 +106,365 @@
   transition: all 0.2s ease;
 }
 
+/* Enhanced Search Section */
+.search-section,
+.location-input-container {
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
 
-/* Search/Go Button */
-.go-btn {
+.search-container,
+.location-input-container {
+  display:grid;
+  align-items: center;
+  background: var(--input-bg);
+  border: 2px solid var(--input-border);
+  border-radius: 16px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-container.focused,
+.location-input-container:focus-within {
+  border-color: var(--btn-outline-border);
+  box-shadow: 0 8px 30px rgba(92, 46, 214, 0.15);
+  transform: translateY(-2px);
+}
+
+.search-icon {
+  padding: 12px 16px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.search-container.focused .search-icon,
+.location-input-container:focus-within .search-icon {
+  color: var(--btn-outline-border);
+}
+
+.search-input {
+  flex: 1;
   border: none;
   outline: none;
-  padding: 10px 16px;
-  width: 80%;
-  max-width: 200px;
-  font-size: 15px;
-  color: white;
-  background: #111;
-  border-radius: 30px;
-  height: 44px;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
-  transition: background 0.3s ease, transform 0.2s ease;
+  font-size: 16px;
+  padding: 16px 8px;
+  background: transparent;
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-weight: 400;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+
+.search-btn {
+  background: linear-gradient(135deg, var(--btn-bg), var(--btn-outline-border));
+  color: var(--btn-text);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(92, 46, 214, 0.3);
+  font-family: var(--font-family);
+  flex-shrink: 0;
+  min-width: 80px;
+  white-space: nowrap;
 }
 
-.go-btn:hover {
-  background: #1e1e1e;
-  transform: scale(1.03);
+.search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(92, 46, 214, 0.4);
 }
 
-/* Illustration Image */
-.illustration {
+.search-btn:active {
+  transform: translateY(0);
+}
+
+/* Auto-complete Dropdown */
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  margin-top: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+  overflow: hidden;
+  animation: slideDown 0.3s ease;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 15px;
+  color: var(--text-color);
+
+}
+
+.suggestion-item:hover {
+  background-color: rgba(92, 46, 214, 0.05);
+}
+
+.suggestion-item svg {
+  color: var(--btn-outline-border);
+  flex-shrink: 0;
+}
+
+/* Popular Locations Section */
+.popular-section {
   width: 100%;
-  max-width: 90%;
-  height: auto;
-  margin: 1.5rem auto;
-  border-radius: 20px;
-  object-fit: contain;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  max-width: 400px;
 }
 
-/* Optional car graphic block */
+.popular-section h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: var(--text-color);
+}
+
+.popular-cities {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.city-chip {
+  background: rgba(92, 46, 214, 0.1);
+  color: var(--btn-outline-text);
+  border: 1px solid rgba(92, 46, 214, 0.2);
+  border-radius: 25px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-family);
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.city-chip:hover {
+  background: rgba(92, 46, 214, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(92, 46, 214, 0.2);
+  border-color: rgba(92, 46, 214, 0.3);
+}
+
+.city-chip:active {
+  transform: translateY(0);
+  background: rgba(92, 46, 214, 0.2);
+}
+
+/* Car Animation */
+.car-animation {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  
+}
+
 .car {
-  width: 100%;
-  max-width: 800px;
-  height: 400px;
-  background: url('/carhome.png') no-repeat center center;
-  background-size: contain;
-  margin: 0.5rem 0;
-  border-radius: 20px;
+  font-size: 2.5rem;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: drive 4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
-/* Responsive for tablets */
-@media (min-width: 600px) {
-  .logo {
-    width: 130px;
+
+.road {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent 0%, #ddd 50%, transparent 100%);
+  border-radius: 2px;
+}
+
+/* Animations */
+@keyframes drive {
+  0%, 100% { 
+    left: 0; 
+    transform: translateY(-50%) scaleX(1);
+  }
+  50% { 
+    left: calc(100% - 40px); 
+    transform: translateY(-50%) scaleX(-1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Floating elements for visual interest */
+.start-container::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, rgba(92, 46, 214, 0.1), transparent);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.start-container::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), transparent);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .start-container {
+    margin: var(--container-margin) auto;
+    padding: var(--container-padding) 12px 80px;
+  }
+  
+  .top-bar {
+    margin-bottom: 30px;
+  }
+  
+  .main-content {
+    gap: 25px;
+    margin-bottom: 60px;
   }
 
-  .title {
-    font-size: 32px;
+  .popular-cities {
+    gap: 10px;
+  }
+
+  .city-chip {
+    max-width: 320px;
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .start-container {
+    margin: var(--container-margin) auto;
+    padding: var(--container-padding) 12px 80px;
+    border-radius: 12px;
+    min-height: calc(100vh - 24px);
+  }
+
+  .logo {
+    width: 140px;
+  }
+
+  .title,
+  .main-title {
+    font-size: 1.8rem;
   }
 
   .subtitle {
-    font-size: 18px;
+    font-size: 1rem;
   }
 
-  .illustration {
-    max-width: 450px;
+  .search-input {
+    font-size: 16px;
+    padding: 14px 8px;
   }
 
-  .nav-icon {
-    font-size: 32px;
+  .search-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .popular-cities {
+    gap: 8px;
+  }
+
+  .city-chip {
+    font-size: 13px;
+    padding: 8px 16px;
+    max-width: 100%;
+    min-height: 44px;
+  }
+
+  .main-content {
+    gap: 20px;
+  }
+
+  .popular-section {
+    max-width: 100%;
   }
 }
 
-/* Small devices */
-@media (max-width: 400px) {
+@media (max-width: 320px) {
   .logo {
-    width: 90px;
+    width: 120px;
   }
 
-  .title {
-    font-size: 24px;
+  .title,
+  .main-title {
+    font-size: 1.6rem;
   }
 
-  .subtitle {
-    font-size: 14px;
+  .search-container,
+  .location-input-container {
+    padding: 2px;
   }
 
-  .location-select,
-  .go-btn {
-    width: 95%;
-    font-size: 14px;
-    height: 42px;
+  .search-btn {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 
-  .nav-icon {
-    font-size: 24px;
+  .search-icon {
+    padding: 10px 12px;
+  }
+
+  .city-chip {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-height: 40px;
   }
 }

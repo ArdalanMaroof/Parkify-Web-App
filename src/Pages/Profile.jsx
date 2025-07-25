@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Profile.css';
 import BottomNav from './component/BottomNav';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Profile() {
   const [user, setUser] = useState({ name: '', email: '', phoneNumber: '', vehicleNumber: '' });
@@ -14,24 +16,24 @@ export default function Profile() {
     const token = localStorage.getItem('token');
     console.log('Token on mount:', token);
     if (token) {
+      //Fetch user profile
 
-        //Fetch user profile
-      
-      axios.get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      }).then((res) => {
-            
-        setUser({
-          name: res.data.name || '',
-          email: res.data.email || '',
-          phoneNumber: res.data.phoneNumber || '',
-          vehicleNumber: res.data.vehicleNumber || '',
+      axios
+        .get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setUser({
+            name: res.data.name || '',
+            email: res.data.email || '',
+            phoneNumber: res.data.phoneNumber || '',
+            vehicleNumber: res.data.vehicleNumber || '',
+          });
+        })
+        .catch((err) => {
+          console.error('Error fetching profile:', err);
         });
-            
-      }).catch((err) => {
-        console.error('Error fetching profile:', err);
-      });
-    } 
+    }
   }, []);
 
   const handleSave = async () => {
@@ -44,22 +46,23 @@ export default function Profile() {
           'https://parkify-web-app-backend.onrender.com/api/auth/profile',
           user,
           {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         console.log('Save response:', response.data);
-        alert('Profile saved successfully!');
+        toast.success('Profile saved successfully!');
         // Navigate to ParkingSpots page
-        navigate('/spots');
-        
+        setTimeout(() => {
+          navigate('/spots');
+        }, 1000);
       } catch (err) {
         console.error('Error saving profile:', err.response ? err.response.data : err.message);
-        alert('Failed to save profile.');
+        toast.error('Failed to save profile.');
       }
     } else {
-      alert('No token found. Please log in.');
+      toast.warn('No token found. Please log in.');
     }
   };
-
 
   const handlePhoneNumberChange = (e) => {
     const value = e.target.value;
@@ -72,10 +75,9 @@ export default function Profile() {
     }
   };
 
-
   return (
-    <div className="auth-container">
-      <div className="profile-content">
+    <div className="profile-container ">
+      <div className="auth-form">
         <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
         <h2>My Profile</h2>
         <input
@@ -84,12 +86,7 @@ export default function Profile() {
           value={user.name}
           onChange={(e) => setUser({ ...user, name: e.target.value })}
         />
-        <input
-          type="email"
-          placeholder="Email"
-          value={user.email}
-          disabled
-        />
+        <input type="email" placeholder="Email" value={user.email} disabled />
         <input
           type="tel"
           placeholder="Phone Number"
@@ -97,9 +94,7 @@ export default function Profile() {
           onChange={handlePhoneNumberChange}
         />
         {phoneError && (
-          <p style={{ color: '#f44336', fontSize: '12px', marginTop: '4px' }}>
-            {phoneError}
-          </p>
+          <p style={{ color: '#f44336', fontSize: '12px', marginTop: '4px' }}>{phoneError}</p>
         )}
         <input
           type="text"
@@ -109,7 +104,9 @@ export default function Profile() {
         />
         <button onClick={handleSave}>Save</button>
       </div>
+
       <BottomNav />
+      <toast position="top-center" autoClose={3000} />
     </div>
   );
 }

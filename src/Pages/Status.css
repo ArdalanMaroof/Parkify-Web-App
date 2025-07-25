@@ -3,6 +3,8 @@
   color: white;
   background-color: black;
   min-height: 100vh;
+  min-width: 420px;
+
 }
 
 .logo {

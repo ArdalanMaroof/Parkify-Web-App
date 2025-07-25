@@ -1,20 +1,3 @@
-/* Base container for auth or home screens */
-.auth-container,
-.home-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between; /* spreads elements */
-    height: 100vh; /* full height of viewport */
-    padding: 0 16px; /* horizontal padding only */
-    background-color: #000;
-    color: white;
-    text-align: center;
-    margin: 0 auto;
-    box-sizing: border-box;
-    overflow: hidden; /* hides overflow to stop scroll */
-    max-width: 500px;
-}
 
 .spinner {
   border: 4px solid rgba(255, 255, 255, 0.3);
