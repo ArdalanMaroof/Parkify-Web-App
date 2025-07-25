@@ -1,66 +1,416 @@
+/* Status Page - Base Styles (Light Theme) */
 .status-container {
   padding: 20px;
-  color: white;
-  background-color: black;
+  color: var(--text-color, #333);
+  background-color: var(--bg-color, #ffffff);
   min-height: 100vh;
   min-width: 420px;
-
+  transition: all 0.3s ease;
 }
 
 .logo {
   width: 120px;
   display: block;
   margin: 0 auto 10px;
+  filter: var(--logo-filter, none);
+  transition: filter 0.3s ease;
 }
 
 .title {
   text-align: center;
   margin-bottom: 20px;
+  color: var(--title-color, #333);
+  font-weight: 700;
+  font-size: 1.5rem;
 }
 
 .active-session {
-  background-color: #1f1f1f;
+  background-color: var(--session-bg, #f8f9fa);
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 20px;
+  border: 1px solid var(--session-border, #e9ecef);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.direction-btn, .end-btn {
-  background-color: #1976d2;
-  color: white;
-  padding: 10px;
+.direction-btn, 
+.end-btn {
+  background-color: var(--primary-btn-bg, #1976d2);
+  color: var(--primary-btn-text, white);
+  padding: 12px 16px;
   border: none;
-  border-radius: 6px;
-  font-weight: bold;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
   width: 100%;
   cursor: pointer;
   margin-top: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.direction-btn:hover {
+  background-color: var(--primary-btn-hover, #1565c0);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
 }
 
 .end-btn {
-  background-color: #d32f2f;
+  background-color: var(--danger-btn-bg, #d32f2f);
+  color: var(--danger-btn-text, white);
+}
+
+.end-btn:hover {
+  background-color: var(--danger-btn-hover, #b71c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
 }
 
 .history-title {
   margin-top: 20px;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--history-title-color, #333);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent-color, #1976d2);
 }
 
 .history-list {
   list-style: none;
   padding: 0;
-  margin: 10px 0;
+  margin: 15px 0;
 }
 
 .history-item {
-  background-color: #2a2a2a;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 10px;
+  background-color: var(--history-item-bg, #f8f9fa);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid var(--history-item-border, #e9ecef);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.no-parking, .no-history {
-  color: #ccc;
-  margin-top: 10px;
+.history-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.no-parking, 
+.no-history {
+  color: var(--muted-text, #6c757d);
+  margin-top: 15px;
+  text-align: center;
+  font-style: italic;
+  padding: 20px;
+  background-color: var(--muted-bg, rgba(108, 117, 125, 0.1));
+  border-radius: 8px;
+  border: 1px dashed var(--muted-border, #dee2e6);
+}
+
+/* Additional elements that might be present */
+.session-info {
+  margin-bottom: 12px;
+}
+
+.session-info p {
+  margin: 8px 0;
+  color: var(--session-text, #333);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.session-info strong {
+  color: var(--session-strong, #1976d2);
+  font-weight: 600;
+}
+
+.timer-display {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--timer-color, #1976d2);
+  text-align: center;
+  padding: 10px;
+  background-color: var(--timer-bg, rgba(25, 118, 210, 0.1));
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.status-badge.active {
+  background-color: var(--success-bg, #d4edda);
+  color: var(--success-text, #155724);
+  border: 1px solid var(--success-border, #c3e6cb);
+}
+
+.status-badge.expired {
+  background-color: var(--danger-bg, #f8d7da);
+  color: var(--danger-text, #721c24);
+  border: 1px solid var(--danger-border, #f5c6cb);
+}
+
+/* DARK THEME STYLES */
+
+/* Dark Theme - Status Container */
+body.dark-theme .status-container,
+.dark-theme .status-container,
+html.dark-theme .status-container {
+  --text-color: #ffffff;
+  --bg-color: #1a1a1a;
+  --title-color: #ffffff;
+  --session-bg: #2d2d2d;
+  --session-border: #404040;
+  --session-text: rgba(255, 255, 255, 0.9);
+  --session-strong: #64b5f6;
+  --primary-btn-bg: #1976d2;
+  --primary-btn-text: #ffffff;
+  --primary-btn-hover: #1565c0;
+  --danger-btn-bg: #d32f2f;
+  --danger-btn-text: #ffffff;
+  --danger-btn-hover: #b71c1c;
+  --history-title-color: #ffffff;
+  --history-item-bg: #2d2d2d;
+  --history-item-border: #404040;
+  --muted-text: #b0b0b0;
+  --muted-bg: rgba(176, 176, 176, 0.1);
+  --muted-border: #404040;
+  --accent-color: #64b5f6;
+  --timer-color: #64b5f6;
+  --timer-bg: rgba(100, 181, 246, 0.15);
+  --success-bg: rgba(76, 175, 80, 0.2);
+  --success-text: #81c784;
+  --success-border: rgba(76, 175, 80, 0.4);
+  --danger-bg: rgba(244, 67, 54, 0.2);
+  --danger-text: #ef5350;
+  --danger-border: rgba(244, 67, 54, 0.4);
+  --logo-filter: brightness(0) invert(1);
+  
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+/* Dark Theme - Ensure all text inherits proper colors */
+body.dark-theme .status-container *,
+.dark-theme .status-container *,
+html.dark-theme .status-container * {
+  color: inherit;
+}
+
+/* Dark Theme - Logo adjustments */
+body.dark-theme .status-container .logo,
+.dark-theme .status-container .logo,
+html.dark-theme .status-container .logo {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* Dark Theme - Title */
+body.dark-theme .status-container .title,
+.dark-theme .status-container .title,
+html.dark-theme .status-container .title {
+  color: #ffffff !important;
+}
+
+/* Dark Theme - Active Session */
+body.dark-theme .status-container .active-session,
+.dark-theme .status-container .active-session,
+html.dark-theme .status-container .active-session {
+  background-color: #2d2d2d !important;
+  border: 1px solid #404040 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Dark Theme - Session Info */
+body.dark-theme .status-container .session-info p,
+.dark-theme .status-container .session-info p,
+html.dark-theme .status-container .session-info p {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.dark-theme .status-container .session-info strong,
+.dark-theme .status-container .session-info strong,
+html.dark-theme .status-container .session-info strong {
+  color: #64b5f6 !important;
+}
+
+/* Dark Theme - Buttons */
+body.dark-theme .status-container .direction-btn,
+body.dark-theme .status-container .end-btn,
+.dark-theme .status-container .direction-btn,
+.dark-theme .status-container .end-btn,
+html.dark-theme .status-container .direction-btn,
+html.dark-theme .status-container .end-btn {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-theme .status-container .direction-btn:hover,
+.dark-theme .status-container .direction-btn:hover,
+html.dark-theme .status-container .direction-btn:hover {
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.4) !important;
+}
+
+body.dark-theme .status-container .end-btn:hover,
+.dark-theme .status-container .end-btn:hover,
+html.dark-theme .status-container .end-btn:hover {
+  box-shadow: 0 4px 16px rgba(211, 47, 47, 0.4) !important;
+}
+
+/* Dark Theme - History Title */
+body.dark-theme .status-container .history-title,
+.dark-theme .status-container .history-title,
+html.dark-theme .status-container .history-title {
+  color: #ffffff !important;
+  border-bottom-color: #64b5f6 !important;
+}
+
+/* Dark Theme - History Items */
+body.dark-theme .status-container .history-item,
+.dark-theme .status-container .history-item,
+html.dark-theme .status-container .history-item {
+  background-color: #2d2d2d !important;
+  border: 1px solid #404040 !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-theme .status-container .history-item:hover,
+.dark-theme .status-container .history-item:hover,
+html.dark-theme .status-container .history-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  background-color: #353535 !important;
+}
+
+body.dark-theme .status-container .no-parking,
+body.dark-theme .status-container .no-history,
+.dark-theme .status-container .no-parking,
+.dark-theme .status-container .no-history,
+html.dark-theme .status-container .no-parking,
+html.dark-theme .status-container .no-history {
+  color: #b0b0b0 !important;
+  background-color: rgba(176, 176, 176, 0.1) !important;
+  border-color: #404040 !important;
+}
+
+body.dark-theme .status-container .timer-display,
+.dark-theme .status-container .timer-display,
+html.dark-theme .status-container .timer-display {
+  color: #64b5f6 !important;
+  background-color: rgba(100, 181, 246, 0.15) !important;
+}
+
+/* Dark Theme - Status Badges */
+body.dark-theme .status-container .status-badge.active,
+.dark-theme .status-container .status-badge.active,
+html.dark-theme .status-container .status-badge.active {
+  background-color: rgba(76, 175, 80, 0.2) !important;
+  color: #81c784 !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+}
+
+body.dark-theme .status-container .status-badge.expired,
+.dark-theme .status-container .status-badge.expired,
+html.dark-theme .status-container .status-badge.expired {
+  background-color: rgba(244, 67, 54, 0.2) !important;
+  color: #ef5350 !important;
+  border-color: rgba(244, 67, 54, 0.4) !important;
+}
+
+body.dark-theme .status-container h1,
+body.dark-theme .status-container h2,
+body.dark-theme .status-container h3,
+body.dark-theme .status-container h4,
+body.dark-theme .status-container h5,
+body.dark-theme .status-container h6,
+.dark-theme .status-container h1,
+.dark-theme .status-container h2,
+.dark-theme .status-container h3,
+.dark-theme .status-container h4,
+.dark-theme .status-container h5,
+.dark-theme .status-container h6 {
+  color: #ffffff !important;
+}
+
+body.dark-theme .status-container p,
+body.dark-theme .status-container span,
+body.dark-theme .status-container div,
+body.dark-theme .status-container li,
+.dark-theme .status-container p,
+.dark-theme .status-container span,
+.dark-theme .status-container div,
+.dark-theme .status-container li {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Dark Theme - Input fields if any */
+body.dark-theme .status-container input,
+body.dark-theme .status-container textarea,
+body.dark-theme .status-container select,
+.dark-theme .status-container input,
+.dark-theme .status-container textarea,
+.dark-theme .status-container select {
+  background-color: #2d2d2d !important;
+  border: 1px solid #404040 !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+}
+
+body.dark-theme .status-container input::placeholder,
+body.dark-theme .status-container textarea::placeholder,
+.dark-theme .status-container input::placeholder,
+.dark-theme .status-container textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+body.dark-theme .status-container input:focus,
+body.dark-theme .status-container textarea:focus,
+body.dark-theme .status-container select:focus,
+.dark-theme .status-container input:focus,
+.dark-theme .status-container textarea:focus,
+.dark-theme .status-container select:focus {
+  border-color: #64b5f6 !important;
+  box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2) !important;
+  outline: none !important;
+}
+
+/* Responsive adjustments for dark theme */
+@media (max-width: 768px) {
+  body.dark-theme .status-container,
+  .dark-theme .status-container {
+    min-width: 100%;
+    padding: 15px;
+  }
+  
+  body.dark-theme .status-container .active-session,
+  .dark-theme .status-container .active-session {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.dark-theme .status-container .direction-btn,
+  body.dark-theme .status-container .end-btn,
+  .dark-theme .status-container .direction-btn,
+  .dark-theme .status-container .end-btn {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+[data-theme="dark"] .status-container,
+.theme-dark .status-container {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .status-container *,
+.theme-dark .status-container * {
+  color: inherit;
 }

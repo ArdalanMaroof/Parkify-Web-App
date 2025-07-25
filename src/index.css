@@ -60,6 +60,7 @@ body {
 }
 
 .auth-container,
+.spots-container,
 .profile-container,
 .home-container,
 .status-container,
@@ -672,6 +673,7 @@ button.success:hover,
   }
 
   .auth-container,
+  .spots-container,
   .profile-container,
   .home-container,
   .start-container,
