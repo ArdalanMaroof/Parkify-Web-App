@@ -52,5 +52,26 @@ router.post("/add", async (req, res) => {
     }
 });
 
+// GET /user/:email - Return total score for a specific user
+router.get("/user/:email", async (req, res) => {
+    const email = req.params.email;
+
+    try {
+        const scores = await Score.find({ email });
+
+        if (scores.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const totalScore = scores.reduce((sum, s) => sum + s.score, 0);
+        const username = scores[0].username;
+
+        res.json({ email, username, score: totalScore });
+    } catch (err) {
+        console.error("❌ Error fetching user score:", err);
+        res.status(500).json({ error: "Error fetching user score" });
+    }
+});
+
 
 module.exports = router;

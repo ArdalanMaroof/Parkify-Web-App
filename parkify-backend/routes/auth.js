@@ -30,14 +30,11 @@ router.post("/signup", async (req, res) => {
 
         // Create a new user document
         const newUser = new User({
-            username: name, //User name as a username
             name,
             email: email.toLowerCase(),
             password: hashedPassword,
             isFirstLogin: true,
-            score: 0,
-            balance: 0,
-
+            
         });
 
         // Save user to the database
@@ -49,9 +46,9 @@ router.post("/signup", async (req, res) => {
             message: "User created successfully",
             data: {
                 id: savedUser._id,
-                username: savedUser.username,
                 name: savedUser.name,
                 email: savedUser.email,
+                createdAt: savedUser.createdAt
             },
         });
 
@@ -113,7 +110,6 @@ router.post("/login", async (req, res) => {
         // Generate JWT token with 1-hour expiry
         const accessToken = jwt.sign(
             {
-                username: foundUser.username,
                 name: foundUser.name,
                 email: foundUser.email,
                 id: foundUser._id,
@@ -129,7 +125,6 @@ router.post("/login", async (req, res) => {
             token: accessToken,
             data: {
                 id: foundUser._id,
-                username: foundUser.username,
                 name: foundUser.name,
                 email: foundUser.email,
                 isFirstLogin: isFirstLogin
@@ -142,7 +137,6 @@ router.post("/login", async (req, res) => {
             token: accessToken,
             data: {
                 id: foundUser._id,
-                username: foundUser.username,
                 name: foundUser.name,
                 email: foundUser.email,
                 isFirstLogin: isFirstLogin
@@ -182,7 +176,7 @@ router.get("/profile", async (req, res) => {
 
      // Find the user in the database using the email from the decoded token
     // Exclude the password field from the returned user object
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findOne({email: decoded.email}).select('-password');
 
     console.log("👉 Profile fetched:", user); // Debug log
 
@@ -190,23 +184,9 @@ router.get("/profile", async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Return the user data
-    res.status(200).json({
-      message: "Profile fetched successfully",
-      data: {
-        username: user.username,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        vehicleNumber: user.vehicleNumber,
-        isFirstLogin: user.isFirstLogin,
-        score: user.score || 0,
-        balance: user.balance || 0,
-      },
-    });
+    res.status(200).json(user);
+    
   } catch (err) {
-
-
-    console.error("❌ Profile fetch error:", err);
     // If token verification fails or any other error occurs, respond with 500
     res.status(500).json({ message: "Invalid token", error: err.message });
   }
@@ -221,8 +201,8 @@ router.get("/profile", async (req, res) => {
 
 // Route to update the user's profile information
 router.put("/profile", async (req, res) => {
-    console.log(req.body, "Show Success ")
-     // Extract the token from the Authorization header (format: "Bearer <token>")
+  console.log(req.body, "Show Success ")
+  // Extract the token from the Authorization header (format: "Bearer <token>")
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: "No token provided" });
 
@@ -231,13 +211,13 @@ router.put("/profile", async (req, res) => {
     // Verify and decode the JWT using the server's secret key
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
-    // Extract the new profile data from the request body
-    const { name, email, phoneNumber, vehicleNumber } = req.body;
+    // Extract the new profile data from the request body, excluding email
+    const { name, phoneNumber, vehicleNumber } = req.body;
 
     // Find the user by the decoded email and update the profile fields
     const updatedUser = await User.findByIdAndUpdate(
         decoded.id ,
-      { name, email: email.toLowerCase(), phoneNumber, vehicleNumber, isFirstLogin: false },
+      { name, phoneNumber, vehicleNumber, isFirstLogin: false },
       { new: true, runValidators: true, select: '-password' }
     );
 
@@ -247,22 +227,9 @@ router.put("/profile", async (req, res) => {
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
     
     // Send back a success message with the updated user data
-    res.status(200).json({
-      message: "Profile updated successfully",
-      data: {
-        username: updatedUser.username,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        phoneNumber: updatedUser.phoneNumber,
-        vehicleNumber: updatedUser.vehicleNumber,
-        isFirstLogin: updatedUser.isFirstLogin,
-        score: updatedUser.score || 0,
-        balance: updatedUser.balance || 0,
-      },
-    });
-} catch (err) {
-
-    console.error("❌ Profile update error:", err);
+    res.status(200).json({ message: "Profile updated successfully", data: updatedUser});
+  
+  } catch (err) {
 
     // Catch any errors (e.g. invalid token, DB errors) and return a 500 error
     res.status(500).json({ message: "Error updating profile", error: err.message });
