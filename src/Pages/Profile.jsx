@@ -18,7 +18,7 @@ export default function Profile() {
         //Fetch user profile
       
       axios.get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       }).then((res) => {
             
         setUser({
@@ -44,7 +44,7 @@ export default function Profile() {
           'https://parkify-web-app-backend.onrender.com/api/auth/profile',
           user,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` }
           });
         console.log('Save response:', response.data);
         alert('Profile saved successfully!');
