@@ -56,6 +56,7 @@ const ParkingSpots = () => {
   const [inputVisible, setInputVisible] = useState({});
   const [freeCounts, setFreeCounts] = useState({});
   const [parkedSpotId, setParkedSpotId] = useState(null);
+  const [isProfileComplete, setIsProfileComplete] = useState(true);
 
   const location = useLocation();
   const navigate = useNavigate();
