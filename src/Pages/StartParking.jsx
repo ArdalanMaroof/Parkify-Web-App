@@ -87,9 +87,13 @@ const StartParking = () => {
     <div className="start-container">
       <div className="top-bar">
         <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
+
         <label className="theme-switch">
           <input type="checkbox" onChange={toggleTheme} checked={theme === 'dark'} />
-          <span className="slider"></span>
+          <span className="slider">
+            <span>☀️</span>
+            <span>🌙</span>
+          </span>
         </label>
       </div>
 
@@ -119,7 +123,9 @@ const StartParking = () => {
             </button>
           </div>
           <div className="car-animation">
-            <div className="car">🚗</div>
+            <div className="car">
+              <img src="/sport-car.png" alt="Sport Car" className="car-image" />
+            </div>
             <div className="road"></div>
           </div>
           {location && showSuggestions && filteredCities.length > 0 && (
