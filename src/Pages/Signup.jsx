@@ -17,15 +17,15 @@ export default function Signup() {
     const trimmedPassword = password.trim();
 
     if (!trimmedName || !trimmedEmail || !trimmedPassword) {
-      alert('Please fill in all fields.');
+      toast.error('⚠️ Please fill in all fields to continue.');
       return;
     }
     if (!/\S+@\S+\.\S+/.test(trimmedEmail)) {
-      toast.warn('📧 Enter a valid email address.');
+      toast.warn('📧 Please enter a valid email address.');
       return;
     }
     if (trimmedPassword.length < 6) {
-      toast.warn('🔒 Password must be at least 6 characters.');
+      toast.warn('🔒 Password must be at least 6 characters long.');
       return;
     }
 
@@ -38,11 +38,18 @@ export default function Signup() {
         password: trimmedPassword,
       });
 
-      toast.success(`🎉 Welcome aboard, ${trimmedName.split(' ')[0]}!`);
-      navigate('/login');
+      // Improved success message
+      toast.success(`🎉 Account created successfully! Welcome to Parkify, ${trimmedName.split(' ')[0]}! Please login with your credentials.`, {
+        autoClose: 4000, // Give user more time to read
+      });
+      
+      // Small delay before redirecting to let user read the message
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || 'Signup failed. Try again.';
-      alert(errorMsg);
+      const errorMsg = err.response?.data?.error || 'Signup failed. Please try again.';
+      toast.error(`❌ ${errorMsg}`);
     } finally {
       setLoading(false);
     }
