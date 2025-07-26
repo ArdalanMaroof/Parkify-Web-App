@@ -235,6 +235,7 @@ input:checked + .slider:before {
   width: 100%;
   text-align: center;
   max-width: 400px;
+  margin-bottom: 60px;
 }
 
 .popular-section h3 {
@@ -431,6 +432,7 @@ input:checked + .slider:before {
 
   .main-content {
     gap: 20px;
+    margin-bottom: 60px;
   }
 
   .popular-section {
