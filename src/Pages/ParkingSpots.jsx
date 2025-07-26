@@ -17,7 +17,7 @@ import MapClickCloser from './component/MapClickCloser';
 import ParkingTimer from './component/ParkingTimer';
 import { handleStripePayment } from './component/stripePayment';
 import { isUserNearby } from './component/distance';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const blueIcon = new L.Icon({
@@ -67,6 +67,27 @@ const ParkingSpots = () => {
   const [activeSpotId, setActiveSpotId] = useState(null);
   const [popupPosition, setPopupPosition] = useState(null);
 
+  
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    return document.body.getAttribute('data-theme') || 'light';
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          setCurrentTheme(document.body.getAttribute('data-theme') || 'light');
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    return () => observer.disconnect();
+  }, []);
   const query = new URLSearchParams(useLocation().search);
   const selectedArea = query.get('location') || 'All';
 
@@ -696,6 +717,28 @@ const ParkingSpots = () => {
           })()}
       </div>
       <BottomNav />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={currentTheme === 'dark' ? 'dark' : 'light'}
+        toastStyle={{
+          backgroundColor: currentTheme === 'dark' ? '#1e1e1e' : '#ffffff',
+          color: currentTheme === 'dark' ? '#f1f1f1' : '#1a1a1a',
+          border: currentTheme === 'dark' ? '1px solid #444' : '1px solid #ccc',
+          borderRadius: '8px',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+        progressStyle={{
+          background: currentTheme === 'dark' ? '#7c3aed' : '#5c2ed6',
+        }}
+      />
     </div>
   );
 };
