@@ -212,23 +212,22 @@ html.dark-theme .status-container .logo {
   filter: brightness(0) invert(1) !important;
 }
 
-/* Dark Theme - Title */
 body.dark-theme .status-container .title,
 .dark-theme .status-container .title,
 html.dark-theme .status-container .title {
   color: #ffffff !important;
 }
 
-/* Dark Theme - Active Session */
-body.dark-theme .status-container .active-session,
-.dark-theme .status-container .active-session,
-html.dark-theme .status-container .active-session {
+body.dark-theme .active-session,
+.dark-theme .active-session,
+html.dark-theme .active-session,
+[data-theme="dark"] .active-session,
+.theme-dark .active-session {
   background-color: #2d2d2d !important;
   border: 1px solid #404040 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Dark Theme - Session Info */
 body.dark-theme .status-container .session-info p,
 .dark-theme .status-container .session-info p,
 html.dark-theme .status-container .session-info p {

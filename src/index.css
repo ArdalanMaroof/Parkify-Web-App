@@ -238,6 +238,7 @@ input:focus {
   list-style: none;
   padding: 0;
   margin: 20px 0;
+  margin-bottom: 70px;
 }
 
 .parking-item,
