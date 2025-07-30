@@ -7,9 +7,9 @@ const confirmedParkingSchema = new mongoose.Schema({
   address: String,
   latitude: Number,
   longitude: Number,
-  duration: { type: Number, default: 3600 }, // in seconds
+  duration: { type: Number, default: 3600 },
   confirmedAt: { type: Date, default: Date.now },
-  endsAt: Date, 
+  endsAt: Date,
   isActive: { type: Boolean, default: true },
 });
 

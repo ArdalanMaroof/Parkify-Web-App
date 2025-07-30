@@ -1,76 +1,111 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Score = require("../models/Score");
+const Score = require('../models/Score');
+const User = require('../models/User');
 
-//  GET /top - Return top 10 users by total score
-router.get("/top", async (req, res) => {
-    try {
-        //For debugging
-        console.log("📤 Fetching top scores...");
-        const topScores = await Score.aggregate([
-            {
-                $group: {
-                    _id: { email: "$email", username: "$username" },
-                    totalScore: { $sum: "$score" }
-                }
-            },
-            { $sort: { totalScore: -1 } },
-            { $limit: 10 }
-        ]);
+router.get('/top', async (req, res) => {
+  try {
+    console.log('📤 Fetching top scores...');
+    const topScores = await Score.aggregate([
+      {
+        $group: {
+          _id: { email: '$email', username: '$username' },
+          totalScore: { $sum: '$score' },
+        },
+      },
+      { $sort: { totalScore: -1 } },
+      { $limit: 10 },
+    ]);
 
-        console.log("✅ Top scores calculated:", topScores);
-
-        res.json(topScores.map(user => ({
-            _id: user._id.email,
-            username: user._id.username,
-            score: user.totalScore
-        })));
-    } catch (err) {
-        res.status(500).json({ error: "Error fetching top scores" });
-    }
+    console.log('✅ Top scores calculated:', topScores);
+    res.json(
+      topScores.map((user) => ({
+        _id: user._id.email,
+        username: user._id.username,
+        score: user.totalScore,
+      }))
+    );
+  } catch (err) {
+    console.error('❌ Error fetching top scores:', err);
+    res.status(500).json({ error: 'Error fetching top scores' });
+  }
 });
 
-//to record each point-earning action
-router.post("/add", async (req, res) => {
-    const { email, username, score, action } = req.body;
+router.post('/add', async (req, res) => {
+  const { email, username, score, action } = req.body;
 
-    //For debugging
-    console.log("📥 Incoming score submission:");
-    console.log("Email:", email);
-    console.log("Username:", username);
-    console.log("Score:", score);
-    console.log("Action:", action);
+  console.log('📥 Incoming score submission:', { email, username, score, action });
 
-    try {
-        const newScore = new Score({ email, username, score, action });
-        await newScore.save();
-        console.log("✅ Score saved successfully to MongoDB");
-        res.status(201).json({ message: "Score saved successfully" });
-    } catch (err) {
-        console.error("❌ Error saving score:", err);
-        res.status(500).json({ error: "Error saving score" });
+  try {
+    if (!email || !score || !action) {
+      return res.status(400).json({ error: 'Email, score, and action are required' });
     }
+
+    const newScore = new Score({ email, username, score, action });
+    await newScore.save();
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.totalScore = (user.totalScore || 0) + score;
+    user.totalBalance = user.totalScore * 0.01;
+    const savedUser = await user.save();
+    console.log('✅ User updated with new score:', {
+      email: savedUser.email,
+      totalScore: savedUser.totalScore,
+      totalBalance: savedUser.totalBalance,
+    });
+
+    res.status(201).json({
+      message: 'Score saved successfully',
+      data: {
+        email: savedUser.email,
+        totalScore: savedUser.totalScore,
+        totalBalance: savedUser.totalBalance,
+      },
+    });
+  } catch (err) {
+    console.error('❌ Error saving score or updating user:', {
+      message: err.message,
+      stack: err.stack,
+      code: err.code,
+    });
+    res.status(500).json({ error: 'Error saving score', message: err.message });
+  }
 });
 
-// GET /user/:email - Return total score for a specific user
-router.get("/user/:email", async (req, res) => {
-    const email = req.params.email;
+router.get('/user/:email', async (req, res) => {
+  const email = req.params.email.toLowerCase();
 
-    try {
-        const scores = await Score.find({ email });
-
-        if (scores.length === 0) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const totalScore = scores.reduce((sum, s) => sum + s.score, 0);
-        const username = scores[0].username;
-
-        res.json({ email, username, score: totalScore });
-    } catch (err) {
-        console.error("❌ Error fetching user score:", err);
-        res.status(500).json({ error: "Error fetching user score" });
+  try {
+    const user = await User.findOne({ email }).select('email username totalScore totalBalance');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    console.log('✅ User data fetched:', {
+      email: user.email,
+      username: user.username,
+      totalScore: user.totalScore,
+      totalBalance: user.totalBalance,
+    });
+
+    res.json({
+      email: user.email,
+      username: user.username,
+      totalScore: user.totalScore || 0,
+      totalBalance: user.totalBalance || 0,
+    });
+  } catch (err) {
+    console.error('❌ Error fetching user score:', {
+      message: err.message,
+      stack: err.stack,
+      code: err.code,
+    });
+    res.status(500).json({ error: 'Error fetching user score', message: err.message });
+  }
 });
 
 module.exports = router;

@@ -1,19 +1,17 @@
-const mongoose = require('mongoose');
-const { authConnection } = require('../db');
 
-const UserSchema = new mongoose.Schema({
-  username: String,
-  email: String,
-  password: String,
-  name: String,
+
+
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  isFirstLogin: { type: Boolean, default: true },
   phoneNumber: String,
   vehicleNumber: String,
-  isFirstLogin: { type: Boolean, default: true },
-  score: { type: Number, default: 0 }, 
-  balance: { type: Number, default: 0 }, // Added for Wallet
+  totalScore: { type: Number, default: 0 }, // Use totalScore instead of score
+  totalBalance: { type: Number, default: 0 }, // Use totalBalance instead of balance
+}, { timestamps: true });
 
-  // other fields
-});
-
-const User = authConnection.model("User", UserSchema);
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

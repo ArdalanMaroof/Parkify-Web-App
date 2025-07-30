@@ -18,7 +18,6 @@ import ParkingTimer from './component/ParkingTimer';
 import { handleStripePayment } from './component/stripePayment';
 import { isUserNearby } from './component/distance';
 
-
 const blueIcon = new L.Icon({
   iconUrl: availableIcon,
   shadowUrl: markerShadow,
@@ -80,7 +79,6 @@ const ParkingSpots = () => {
         const { name, phoneNumber, vehicleNumber } = res.data;
         const profileComplete = name && phoneNumber && vehicleNumber;
         setIsProfileComplete(profileComplete);
-          
       }).catch((err) => {
         console.error('Error fetching profile:', err);
         setIsProfileComplete(false);
@@ -138,12 +136,7 @@ const ParkingSpots = () => {
     const email = localStorage.getItem('email');
     const username = localStorage.getItem('username');
 
-    //For debugging
-    console.log('📨 Submitting points...');
-    console.log('Email:', email);
-    console.log('Username:', username);
-    console.log('Points:', points);
-    console.log('Action:', action);
+    console.log('📨 Submitting points...', { email, username, points, action });
 
     if (!email || !username) {
       console.warn('⚠️ Missing email or username in localStorage.');
@@ -158,8 +151,10 @@ const ParkingSpots = () => {
         action,
       });
       console.log('✅ Points submitted successfully:', res.data);
+      return res.data; // Return the response for further use
     } catch (err) {
-      console.error('Error submitting score', err);
+      console.error('❌ Error submitting score:', err);
+      throw err; // Re-throw to handle in calling function
     }
   };
 
@@ -209,14 +204,16 @@ const ParkingSpots = () => {
         const earned = num * 5;
         setPoints((prev) => prev + earned);
         setReportedSpots((prev) => ({ ...prev, [spotId]: true }));
-        submitPoints(earned, 'multi_spot_report');
+        await submitPoints(earned, 'multi_spot_report');
+        window.dispatchEvent(new Event('scoreUpdated')); // Trigger wallet refresh
         alert(`Thanks! You earned ${earned} points.`);
       } catch (error) {
-        console.error('Error updating spot:', error);
+        console.error('❌ Error updating spot:', error);
         alert('Failed to update spot.');
       }
     }
   };
+
   return (
     <div className="spots-container">
       <header className="top-header">
@@ -317,7 +314,6 @@ const ParkingSpots = () => {
           )}
           <MapHelper
             onMapReady={(mapInstance) => {
-              // Save map instance in ref or state if needed
               if (activeSpotId) {
                 const spot = filteredSpots.find((s) => s._id === activeSpotId);
                 if (spot) {
@@ -368,16 +364,13 @@ const ParkingSpots = () => {
                     const rect = container.getBoundingClientRect();
                     const point = map.latLngToContainerPoint([spot.latitude, spot.longitude]);
 
-                    const popupWidth = 280; // same as your popup CSS
-                    const popupHeight = 300; // approximate height
+                    const popupWidth = 280;
+                    const popupHeight = 300;
 
                     let x = point.x;
                     let y = point.y;
 
-                    // Clamp X
                     x = Math.max(popupWidth / 2, Math.min(x, rect.width - popupWidth / 2));
-
-                    // Clamp Y
                     y = Math.max(popupHeight, Math.min(y, rect.height));
 
                     setPopupPosition({ x, y });
@@ -457,13 +450,10 @@ const ParkingSpots = () => {
                           {!freeCounts[spot._id + '_confirmed'] ? (
                             <button
                               disabled={
-                                (!isProfileComplete ||  !!parkedSpotId) && parkedSpotId !== spot._id
+                                (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
                               }
                               onClick={async () => {
-                                
-                                if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id )) return;
-                                
-                                
+                                if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)) return;
                                 try {
                                   await axios.put(
                                     `https://parkify-web-app-backend.onrender.com/api/free-parking/${spot._id}`,
@@ -482,9 +472,8 @@ const ParkingSpots = () => {
                                     [spot._id + '_confirmed']: true,
                                   }));
                                   setPoints((prev) => prev + 5);
-                                  //Give 5 points
-                                  submitPoints(5, 'spot_available');
-
+                                  await submitPoints(5, 'spot_available');
+                                  window.dispatchEvent(new Event('scoreUpdated')); // Trigger wallet refresh
                                   alert('Thanks! 1 spot added. You earned 5 points.');
                                 } catch (err) {
                                   alert('Error updating spot.');
@@ -532,10 +521,7 @@ const ParkingSpots = () => {
                               />
                               <button
                                 disabled={(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id}
-                                
                                 onClick={() => {
-
-
                                   if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)) return;
                                   handleReportSubmit(spot._id);
                                 }}
@@ -582,18 +568,14 @@ const ParkingSpots = () => {
                           />
                           <button
                             disabled={(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id}
-                            
                             onClick={() => {
-                              
-                              
                               if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)) return;
                               handleReportSubmit(spot._id);
                             }}
                             style={{
                               width: '100%',
                               backgroundColor:
-                                (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id ? 
-                                '#ccc' : '#007bff',
+                                (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id ? '#ccc' : '#007bff',
                               color: 'white',
                               padding: '8px',
                               border: 'none',
@@ -615,10 +597,7 @@ const ParkingSpots = () => {
                               <p style={{ marginTop: '10px' }}>Is this lot full?</p>
                               <button
                                 disabled={(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id}
-                                
                                 onClick={async () => {
-
-
                                   if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)) return;
                                   try {
                                     await axios.put(
@@ -634,8 +613,8 @@ const ParkingSpots = () => {
                                       ...prev,
                                       [spot._id]: true,
                                     }));
-                                    // 5 points for reporting full meaked
-                                    submitPoints(5, 'marked_full');
+                                    await submitPoints(5, 'marked_full');
+                                    window.dispatchEvent(new Event('scoreUpdated')); // Trigger wallet refresh
                                   } catch (err) {
                                     alert('Failed to report full status.');
                                     console.error(err);
@@ -688,7 +667,7 @@ const ParkingSpots = () => {
                       borderRadius: '6px',
                       width: '100%',
                       fontWeight: 'bold',
-                      cursor: !isProfileComplete ? 'not-allowed' :  'pointer',
+                      cursor: !isProfileComplete ? 'not-allowed' : 'pointer',
                     }}
                   >
                     Get Directions
@@ -759,17 +738,13 @@ const ParkingSpots = () => {
                     <strong>Are you parking here?</strong>
                     {spot.hasSpots ? (
                       <button
-  
                         onClick={async () => {
-
                           if (!isProfileComplete) return;
                           await handleStripePayment(spot);
-                          submitPoints(2, 'parking_confirmed');
+                          await submitPoints(2, 'parking_confirmed');
+                          window.dispatchEvent(new Event('scoreUpdated')); // Trigger wallet refresh
                         }}
-
                         disabled={(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id}
-                        
-                        
                         style={{
                           backgroundColor: (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id ? '#ccc' : '#4CAF50',
                           color: 'white',
