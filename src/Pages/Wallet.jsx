@@ -12,6 +12,8 @@ export default function Wallet() {
   const [paymentMethod, setPaymentMethod] = useState('email');
   const [paymentDetails, setPaymentDetails] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const POINT_TO_DOLLAR = 0.01;
@@ -123,10 +125,11 @@ export default function Wallet() {
   };
 
   return (
-    <div className="wallet-container">
-      <div className="wallet-content">
+    <>
+      {/* Use the same container class as auth pages for consistent width */}
+      <div className="wallet-container fade-in-up">
         <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
-        <h2>Wallet</h2>
+        <h2>💰 Wallet</h2>
 
         {userScore !== null && userBalance !== null ? (
           <div className="wallet-cards">
@@ -177,7 +180,8 @@ export default function Wallet() {
           </button>
         </div>
       </div>
+      
       <BottomNav />
-    </div>
+    </>
   );
 }

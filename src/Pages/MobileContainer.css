@@ -1,8 +1,0 @@
-.mobile-wrapper {
-  max-width: 425px; /* Simulate mobile width */
-  margin: 0 auto;
-  min-height: 100vh;
-  background-color: #ffffff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional styling */
-  overflow-x: hidden;
-}

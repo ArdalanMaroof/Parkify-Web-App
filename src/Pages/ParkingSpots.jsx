@@ -65,6 +65,27 @@ const ParkingSpots = () => {
   const [activeSpotId, setActiveSpotId] = useState(null);
   const [popupPosition, setPopupPosition] = useState(null);
 
+  
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    return document.body.getAttribute('data-theme') || 'light';
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          setCurrentTheme(document.body.getAttribute('data-theme') || 'light');
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    return () => observer.disconnect();
+  }, []);
   const query = new URLSearchParams(useLocation().search);
   const selectedArea = query.get('location') || 'All';
 
@@ -210,6 +231,11 @@ const ParkingSpots = () => {
       } catch (error) {
         console.error('❌ Error updating spot:', error);
         alert('Failed to update spot.');
+        submitPoints(earned, 'multi_spot_report');
+        toast.success(`🎉 Thanks! You earned ${earned} points.`, {
+          position: 'top-right',
+          autoClose: 2000,
+        });
       }
     }
   };
@@ -227,40 +253,24 @@ const ParkingSpots = () => {
 
       {!isProfileComplete && (
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#fff3cd',
-            padding: '10px',
-            borderRadius: '8px',
-            margin: '10px 0',
-            cursor: 'pointer',
-          }}
+          className="profile-warning"
           onClick={() => navigate('/profile', { state: { from: location } })}
         >
-          <span style={{ color: '#856404', fontWeight: 'bold', marginRight: '8px' }}>⚠</span>
-          <span style={{ color: '#856404' }}>
+          <span className="warning-icon">⚠</span>
+          <span className="warning-text">
             Your profile is incomplete. Please complete it to interact with the app.
           </span>
         </div>
       )}
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '30px',
-          marginTop: '10px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src={availableIcon} alt="Available" style={{ width: '20px' }} />
-          <span style={{ color: '#007bff', fontWeight: 500 }}>Available (Blue)</span>
+      <div className="legend-container">
+        <div className="legend-item">
+          <img src={availableIcon} alt="Available" className="legend-icon" />
+          <span className="legend-text legend-available">Available (Blue)</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src={unavailableIcon} alt="Unavailable" style={{ width: '20px' }} />
-          <span style={{ color: '#d32f2f', fontWeight: 500 }}>Occupied (Red)</span>
+        <div className="legend-item">
+          <img src={unavailableIcon} alt="Unavailable" className="legend-icon" />
+          <span className="legend-text legend-unavailable">Occupied (Red)</span>
         </div>
       </div>
 
@@ -284,19 +294,12 @@ const ParkingSpots = () => {
         </label>
       </div>
 
-      <p
-        style={{
-          textAlign: 'center',
-          marginBottom: '10px',
-          color: '#333',
-          fontWeight: '500',
-        }}
-      >
-        Showing <span style={{ color: '#ff5722' }}>{filteredSpots.length}</span> of{' '}
-        <span style={{ color: '#ff5722' }}>{allSpots.length}</span> spots
+      <p className="spots-count">
+        Showing <span className="count-highlight">{filteredSpots.length}</span> of{' '}
+        <span className="count-highlight">{allSpots.length}</span> spots
       </p>
 
-      <div style={{ height: '80vh', width: '100%', position: 'relative' }}>
+      <div className="map-container">
         <MapContainer
           center={userLocation ? [userLocation.lat, userLocation.lng] : [49.2827, -123.1207]}
           zoom={13}
@@ -330,19 +333,7 @@ const ParkingSpots = () => {
             iconCreateFunction={(cluster) =>
               L.divIcon({
                 html: `
-                  <div style="
-                    background: #007bff;
-                    color: white;
-                    font-size: 13px;
-                    font-weight: bold;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                  ">
+                  <div class="cluster-icon">
                     ${cluster.getChildCount()}
                   </div>
                 `,
@@ -397,56 +388,39 @@ const ParkingSpots = () => {
               <div
                 className="custom-popup"
                 style={{
-                  position: 'absolute',
-                  zIndex: 1000,
                   left: popupPosition.x,
                   top: popupPosition.y,
-                  transform: 'translate(-50%, -100%)',
-                  background: 'white',
-                  padding: '14px',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
-                  width: '280px',
                 }}
               >
-                <button
-                  onClick={() => setActiveSpotId(null)}
-                  style={{
-                    position: 'absolute',
-                    top: '6px',
-                    right: '10px',
-                    background: 'transparent',
-                    border: 'none',
-                    fontSize: '18px',
-                    cursor: 'pointer',
-                  }}
-                >
+                <button onClick={() => setActiveSpotId(null)} className="popup-close-btn">
                   ×
                 </button>
-
-                <h4>{spot.name}</h4>
-                <p>
+                <h4 className="popup-title">{spot.name}</h4>
+                <p className="popup-detail">
                   <strong>Type:</strong> {spot.type}
                 </p>
-                <p>
+                <p className="popup-detail">
                   <strong>Address:</strong> {spot.address || spot.area || 'N/A'}
                 </p>
-                <p>
+                <p className="popup-detail">
                   <strong>Rate:</strong> {spot.paid ? spot.rate || 'Check signage' : 'Free'}
                 </p>
-                <p>
+                <p className="popup-detail">
                   <strong>Hours:</strong> {spot.hours || 'Unknown'}
                 </p>
-
                 {!reportedSpots[spot._id] && (
-                  <div style={{ marginTop: '8px' }}>
-                    <p>
+                  <div className="popup-actions">
+                    <p className="popup-detail">
                       <strong>Status:</strong>{' '}
-                      {spot.hasSpots ? `✅ Available (${spot.availableSpots})` : '❌ Full'}
+                      <span
+                        className={`status-badge ${spot.hasSpots ? 'status-available' : 'status-full'}`}
+                      >
+                        {spot.hasSpots ? `✅ Available (${spot.availableSpots})` : '❌ Full'}
+                      </span>
                     </p>
                     {isNearby ? (
                       <>
-                        <div style={{ marginTop: '6px' }}>
+                        <div className="popup-buttons">
                           {!freeCounts[spot._id + '_confirmed'] ? (
                             <button
                               disabled={
@@ -476,30 +450,23 @@ const ParkingSpots = () => {
                                   window.dispatchEvent(new Event('scoreUpdated')); // Trigger wallet refresh
                                   alert('Thanks! 1 spot added. You earned 5 points.');
                                 } catch (err) {
-                                  alert('Error updating spot.');
+                                  toast.error('❌ Error updating spot.', {
+                                    position: 'top-right',
+                                    autoClose: 3000,
+                                  });
                                 }
                               }}
-                              style={{
-                                width: '100%',
-                                backgroundColor:
-                                  (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id ? '#ccc' : '#4CAF50',
-                                color: 'white',
-                                padding: '8px',
-                                border: 'none',
-                                borderRadius: '4px',
-                                fontWeight: 'bold',
-                                marginTop: '6px',
-                                cursor:
-                                  (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
-                                    ? 'not-allowed'
-                                    : 'pointer',
-                              }}
+                              className={`popup-btn btn-available ${
+                                (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
+                                  ? 'btn-disabled'
+                                  : ''
+                              }`}
                             >
                               ✅ Spot Available
                             </button>
                           ) : (
-                            <div style={{ marginTop: '10px' }}>
-                              <p>See more available spots?</p>
+                            <div className="more-spots-section">
+                              <p className="popup-text">See more available spots?</p>
                               <input
                                 type="number"
                                 min="0"
@@ -511,13 +478,7 @@ const ParkingSpots = () => {
                                     [spot._id]: e.target.value,
                                   }))
                                 }
-                                style={{
-                                  width: '100%',
-                                  padding: '6px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #ccc',
-                                  marginBottom: '6px',
-                                }}
+                                className="popup-input"
                               />
                               <button
                                 disabled={(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id}
@@ -525,24 +486,14 @@ const ParkingSpots = () => {
                                   if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)) return;
                                   handleReportSubmit(spot._id);
                                 }}
-                                style={{
-                                  width: '100%',
-                                  backgroundColor:
-                                    (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
-                                      ? '#ccc'
-                                      : '#007bff',
-                                  color: 'white',
-                                  padding: '8px',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  cursor:
-                                    (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
-                                      ? 'not-allowed'
-                                      : 'pointer',
-                                }}
+                                className={`popup-btn btn-report ${
+                                  (!isProfileComplete || !!parkedSpotId) &&
+                                  parkedSpotId !== spot._id
+                                    ? 'btn-disabled'
+                                    : ''
+                                }`}
                               >
-                                Report More Spots
+                                📊 Report More Spots
                               </button>
                             </div>
                           )}
@@ -558,13 +509,7 @@ const ParkingSpots = () => {
                                 [spot._id]: e.target.value,
                               }))
                             }
-                            style={{
-                              width: '100%',
-                              padding: '6px',
-                              borderRadius: '4px',
-                              border: '1px solid #ccc',
-                              marginBottom: '6px',
-                            }}
+                            className="popup-input"
                           />
                           <button
                             disabled={(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id}
@@ -588,13 +533,12 @@ const ParkingSpots = () => {
                                   : 'pointer',
                             }}
                           >
-                            Report Available Spots
+                            📊 Report Available Spots
                           </button>
-
                           {/* Only show "Mark as Full" if not already full */}
                           {!reportedSpots[spot._id] && spot.hasSpots && (
                             <>
-                              <p style={{ marginTop: '10px' }}>Is this lot full?</p>
+                              <p className="popup-text full-question">Is this lot full?</p>
                               <button
                                 disabled={(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id}
                                 onClick={async () => {
@@ -608,7 +552,10 @@ const ParkingSpots = () => {
                                       }
                                     );
                                     await fetchSpots();
-                                    alert('Thanks! Spot marked as full.');
+                                    toast.success('🎉 Thanks! Spot marked as full.', {
+                                      position: 'top-right',
+                                      autoClose: 3000,
+                                    });
                                     setReportedSpots((prev) => ({
                                       ...prev,
                                       [spot._id]: true,
@@ -616,37 +563,30 @@ const ParkingSpots = () => {
                                     await submitPoints(5, 'marked_full');
                                     window.dispatchEvent(new Event('scoreUpdated')); // Trigger wallet refresh
                                   } catch (err) {
-                                    alert('Failed to report full status.');
+                                    toast.error('❌ Failed to report full status.', {
+                                      position: 'top-right',
+                                      autoClose: 3000,
+                                    });
                                     console.error(err);
                                   }
                                 }}
-                                style={{
-                                  width: '100%',
-                                  backgroundColor:
-                                    (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
-                                      ? '#ccc'
-                                      : '#d32f2f',
-                                  color: 'white',
-                                  padding: '8px',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  cursor:
-                                    (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
-                                      ? 'not-allowed'
-                                      : 'pointer',
-                                }}
+                                className={`popup-btn btn-full ${
+                                  (!isProfileComplete || !!parkedSpotId) &&
+                                  parkedSpotId !== spot._id
+                                    ? 'btn-disabled'
+                                    : ''
+                                }`}
                               >
-                                Mark as Full
+                                ❌ Mark as Full
                               </button>
                             </>
                           )}
                         </div>
                       </>
                     ) : (
-                      <p style={{ color: '#f44336', fontWeight: 'bold', marginTop: '10px' }}>
+                      <div className="location-warning">
                         📍 You must be near this location to confirm or report spots.
-                      </p>
+                      </div>
                     )}
                   </div>
                 )}
@@ -670,7 +610,7 @@ const ParkingSpots = () => {
                       cursor: !isProfileComplete ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    Get Directions
+                    🗺️ Get Directions
                   </button>
                 </a>
                 {confirmedSpots[spot._id]?.userId === localStorage.getItem('userId') ? (
@@ -689,53 +629,44 @@ const ParkingSpots = () => {
                     if (!startTime || isNaN(secondsLeft)) {
                       console.warn('Invalid startTime or secondsLeft:', startTime, secondsLeft);
                       return (
-                        <p style={{ color: '#f44336' }}>❌ Timer failed to load. Please refresh.</p>
+                        <div className="timer-error">❌ Timer failed to load. Please refresh.</div>
                       );
                     }
 
                     return (
-                      <ParkingTimer
-                        spotId={spot._id}
-                        seconds={secondsLeft}
-                        onTimerEnd={() => {
-                          console.log('⏱ Timer ended for spot:', spot._id);
-                          localStorage.removeItem('confirmedSpotId');
-                          localStorage.removeItem(`parkingStart_${spot._id}`);
-                          setConfirmedSpots((prev) => {
-                            const updated = { ...prev };
-                            delete updated[spot._id];
-                            return updated;
-                          });
-                          setParkedSpotId(null);
-                        }}
-                      />
+                      <div className="parking-timer-container">
+                        <ParkingTimer
+                          spotId={spot._id}
+                          seconds={secondsLeft}
+                          onTimerEnd={() => {
+                            console.log('⏱ Timer ended for spot:', spot._id);
+                            localStorage.removeItem('confirmedSpotId');
+                            localStorage.removeItem(`parkingStart_${spot._id}`);
+                            setConfirmedSpots((prev) => {
+                              const updated = { ...prev };
+                              delete updated[spot._id];
+                              return updated;
+                            });
+                            setParkedSpotId(null);
+                          }}
+                        />
+                      </div>
                     );
                   })()
                 ) : parkedSpotId && parkedSpotId !== spot._id ? (
-                  <div style={{ marginTop: '6px' }}>
-                    <p style={{ color: '#555', fontWeight: 'bold' }}>
-                      You are parked at another location.
-                    </p>
+                  <div className="parked-elsewhere">
+                    <p className="parked-text">You are parked at another location.</p>
                     <button
                       disabled={!isProfileComplete}
                       onClick={() => setActiveSpotId(parkedSpotId)}
-                      style={{
-                        backgroundColor: !isProfileComplete ? '#ccc' : '#1976d2',
-                        color: 'white',
-                        padding: '6px 10px',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: !isProfileComplete ? 'not-allowed' : 'pointer',
-                        width: '100%',
-                        marginTop: '4px',
-                      }}
+                      className={`popup-btn btn-active-spot ${!isProfileComplete ? 'btn-disabled' : ''}`}
                     >
                       🔄 Go to Active Spot
                     </button>
                   </div>
                 ) : isNearby ? (
-                  <div style={{ marginTop: '6px' }}>
-                    <strong>Are you parking here?</strong>
+                  <div className="parking-confirmation">
+                    <strong className="parking-question">Are you parking here?</strong>
                     {spot.hasSpots ? (
                       <button
                         onClick={async () => {
@@ -756,22 +687,42 @@ const ParkingSpots = () => {
                           marginTop: '4px',
                         }}
                       >
-                        Yes, I’m parking here
+                        Yes, I'm parking here
                       </button>
                     ) : (
-                      <p style={{ color: '#f44336', marginTop: '4px' }}>
+                      <p className="full-spot-message">
                         ❌ Spot marked as full. Please mark it as available to confirm parking.
                       </p>
                     )}
                   </div>
-                ) : (
-                  <p style={{ color: '#f44336', fontWeight: 'bold', marginTop: '10px' }}></p>
-                )}
+                ) : null}
               </div>
             );
           })()}
-      </div>
+      </div>x
       <BottomNav />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={currentTheme === 'dark' ? 'dark' : 'light'}
+        toastStyle={{
+          backgroundColor: currentTheme === 'dark' ? '#1e1e1e' : '#ffffff',
+          color: currentTheme === 'dark' ? '#f1f1f1' : '#1a1a1a',
+          border: currentTheme === 'dark' ? '1px solid #444' : '1px solid #ccc',
+          borderRadius: '8px',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+        progressStyle={{
+          background: currentTheme === 'dark' ? '#7c3aed' : '#5c2ed6',
+        }}
+      />
     </div>
   );
 };
