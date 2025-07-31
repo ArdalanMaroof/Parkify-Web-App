@@ -30,7 +30,7 @@
     "react-router-dom": "^7.6.2",
     "react-toastify": "^11.0.5",
     "serve": "^14.2.4",
-    "stripe": "^18.3.0"
+    "stripe": "^18.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

@@ -1,7 +1,16 @@
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/home'); // Redirect logged-in users to /home
+    }
+  }, [navigate]);
+
   return (
     <div className="home-container">
       <img

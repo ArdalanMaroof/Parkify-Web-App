@@ -75,7 +75,7 @@ function App() {
           }}
         />
       </div>
-    </ThemeProvider> 
+    </ThemeProvider>
   );
 }
 

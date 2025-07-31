@@ -5,6 +5,8 @@ import './Profile.css';
 import BottomNav from './component/BottomNav';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+// ... (other imports remain the same)
+import { FaSignOutAlt } from 'react-icons/fa'; // Optional: icon for logout
 
 export default function Profile() {
   const [user, setUser] = useState({ name: '', email: '', phoneNumber: '', vehicleNumber: '' });
@@ -14,10 +16,7 @@ export default function Profile() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    console.log('Token on mount:', token);
     if (token) {
-      //Fetch user profile
-
       axios
         .get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
           headers: { Authorization: `Bearer ${token}` },
@@ -37,21 +36,17 @@ export default function Profile() {
   }, []);
 
   const handleSave = async () => {
-    console.log('Saving user data:', user);
     const token = localStorage.getItem('token');
-    console.log('Token during save:', token);
     if (token) {
       try {
-        const response = await axios.put(
+        await axios.put(
           'https://parkify-web-app-backend.onrender.com/api/auth/profile',
           user,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log('Save response:', response.data);
         toast.success('Profile saved successfully!');
-        // Navigate to ParkingSpots page
         setTimeout(() => {
           navigate('/spots');
         }, 1000);
@@ -66,7 +61,6 @@ export default function Profile() {
 
   const handlePhoneNumberChange = (e) => {
     const value = e.target.value;
-    // Allow only numbers
     if (/^\d*$/.test(value)) {
       setUser({ ...user, phoneNumber: value });
       setPhoneError('');
@@ -75,8 +69,17 @@ export default function Profile() {
     }
   };
 
+  // ✅ Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    toast.info('Logged out successfully');
+    setTimeout(() => {
+      navigate('/login');
+    }, 1000);
+  };
+
   return (
-    <div className="profile-container ">
+    <div className="profile-container">
       <div className="auth-form">
         <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
         <h2>My Profile</h2>
@@ -103,17 +106,32 @@ export default function Profile() {
           onChange={(e) => setUser({ ...user, vehicleNumber: e.target.value })}
         />
         <button onClick={handleSave}>Save</button>
+
+        {/* ✅ Logout Button */}
+        <button
+          onClick={handleLogout}
+          style={{
+            marginTop: '12px',
+            backgroundColor: '#f44336',
+            color: '#fff',
+            border: 'none',
+            padding: '10px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}
+        >
+          <FaSignOutAlt style={{ marginRight: '8px' }} />
+          Logout
+        </button>
       </div>
 
       <BottomNav />
+
       <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
-        newestOnTop={false}
         closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
         draggable
         pauseOnHover
       />
