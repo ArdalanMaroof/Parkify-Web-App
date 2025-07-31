@@ -23,7 +23,7 @@ export default function Signup() {
     setLoading(true); // Show loading spinner
 
     try {
-      const res = await axios.post('https://parkify-web-app-backend.onrender.com/api/auth/signup', {
+      const res = await axios.post('http://localhost:2000/api/auth/signup', {
         name: trimmedName,
         email: trimmedEmail,
         password: trimmedPassword,

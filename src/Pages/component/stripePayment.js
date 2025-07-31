@@ -12,7 +12,7 @@ export const handleStripePayment = async (spot) => {
           : 2; // default fallback if rate missing
 
     const res = await fetch(
-      'https://parkify-web-app-backend.onrender.com/api/create-checkout-session',
+      'http://localhost:2000/api/create-checkout-session',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -10,8 +10,8 @@ const userSchema = new mongoose.Schema({
   isFirstLogin: { type: Boolean, default: true },
   phoneNumber: String,
   vehicleNumber: String,
-  totalScore: { type: Number, default: 0 }, // Use totalScore instead of score
-  totalBalance: { type: Number, default: 0 }, // Use totalBalance instead of balance
+  score: { type: Number, default: 0 }, // Use totalScore instead of score
+  balance: { type: Number, default: 0 }, // Use totalBalance instead of balance
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

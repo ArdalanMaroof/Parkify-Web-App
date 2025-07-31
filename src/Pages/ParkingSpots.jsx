@@ -68,12 +68,13 @@ const ParkingSpots = () => {
   const query = new URLSearchParams(useLocation().search);
   const selectedArea = query.get('location') || 'All';
 
+  const userId = localStorage.getItem('userId');
+  const token = localStorage.getItem('token');
+
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    const token = localStorage.getItem('token');
 
     if (token) {
-      axios.get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
+      axios.get('http://localhost:2000/api/auth/profile', {
         headers: { Authorization: `Bearer ${token}` }
       }).then((res) => {
         const { name, phoneNumber, vehicleNumber } = res.data;
@@ -87,7 +88,7 @@ const ParkingSpots = () => {
 
     if (userId) {
       axios
-        .get('https://parkify-web-app-backend.onrender.com/api/confirmed-parking/active', {
+        .get('http://localhost:2000/api/confirmed-parking/active', {
           params: { userId },
         })
         .then((res) => {
@@ -121,7 +122,7 @@ const ParkingSpots = () => {
 
   const fetchSpots = async () => {
     try {
-      const res = await axios.get('https://parkify-web-app-backend.onrender.com/api/free-parking');
+      const res = await axios.get('http://localhost:2000/api/free-parking');
       setAllSpots(res.data);
     } catch (err) {
       console.error('Error fetching spots from DB', err);
@@ -144,11 +145,28 @@ const ParkingSpots = () => {
     }
 
     try {
-      const res = await axios.post('https://parkify-web-app-backend.onrender.com/api/score/add', {
-        email,
-        username,
-        score: points,
-        action,
+      // EITHER CHANGE THE COMMENTED API ACCUMULATE PREVIOUS SCORE POINTS AS WELL OR 
+      // USE PROFILE BECAUSE IT HANDLES THE ACCUMULATION OF SCORES ALREADY.
+      // const res = await axios.post('http://localhost:2000/api/score/add', {
+      //   email,
+      //   username,
+      //   score: points,
+      //   action,
+      // });
+
+      
+      const userProfile = await axios.get(`http://localhost:2000/api/auth/profile`, 
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+      const existingScore = userProfile.data.score;
+        
+      await axios.put(`http://localhost:2000/api/auth/profile`, {
+        score: existingScore + points
+      }, 
+      {
+        headers: { Authorization: `Bearer ${token}` }
       });
       console.log('✅ Points submitted successfully:', res.data);
       return res.data; // Return the response for further use
@@ -196,7 +214,7 @@ const ParkingSpots = () => {
     const num = parseInt(freeCounts[spotId]);
     if (!isNaN(num) && num >= 0) {
       try {
-        await axios.put(`https://parkify-web-app-backend.onrender.com/api/free-parking/${spotId}`, {
+        await axios.put(`http://localhost:2000/api/free-parking/${spotId}`, {
           hasSpots: true,
           availableSpots: num,
         });
@@ -456,7 +474,7 @@ const ParkingSpots = () => {
                                 if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)) return;
                                 try {
                                   await axios.put(
-                                    `https://parkify-web-app-backend.onrender.com/api/free-parking/${spot._id}`,
+                                    `http://localhost:2000/api/free-parking/${spot._id}`,
                                     {
                                       hasSpots: true,
                                       availableSpots: (spot.availableSpots || 0) + 1,
@@ -601,7 +619,7 @@ const ParkingSpots = () => {
                                   if (!isProfileComplete || (!!parkedSpotId && parkedSpotId !== spot._id)) return;
                                   try {
                                     await axios.put(
-                                      `https://parkify-web-app-backend.onrender.com/api/free-parking/${spot._id}`,
+                                      `http://localhost:2000/api/free-parking/${spot._id}`,
                                       {
                                         hasSpots: false,
                                         availableSpots: 0,
@@ -702,7 +720,7 @@ const ParkingSpots = () => {
                           localStorage.removeItem('confirmedSpotId');
                           localStorage.removeItem(`parkingStart_${spot._id}`);
                           setConfirmedSpots((prev) => {
-                            const updated = { ...prev };
+                          const updated = { ...prev };
                             delete updated[spot._id];
                             return updated;
                           });

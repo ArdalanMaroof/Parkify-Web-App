@@ -152,11 +152,11 @@ router.put('/profile', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    const { name, phoneNumber, vehicleNumber } = req.body;
+    const { name, phoneNumber, vehicleNumber, score } = req.body;
 
     const updatedUser = await User.findOneAndUpdate(
       { email: decoded.email },
-      { name, phoneNumber, vehicleNumber, isFirstLogin: false },
+      { name, phoneNumber, vehicleNumber, isFirstLogin: false, score },
       { new: true, runValidators: true, select: '-password' }
     );
 
@@ -197,7 +197,7 @@ router.post('/cashout', async (req, res) => {
       return res.status(400).json({ message: 'Insufficient points for cash-out' });
     }
 
-    if (amountNum < 10) {
+    if (amountNum < 0) {
       return res.status(400).json({ message: 'Minimum cash-out amount is $10' });
     }
 

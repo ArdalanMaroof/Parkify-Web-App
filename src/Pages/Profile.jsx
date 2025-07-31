@@ -17,7 +17,7 @@ export default function Profile() {
 
         //Fetch user profile
       
-      axios.get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
+      axios.get('http://localhost:2000/api/auth/profile', {
         headers: { Authorization: `Bearer ${token}` }
       }).then((res) => {
             
@@ -41,7 +41,7 @@ export default function Profile() {
     if (token) {
       try {
         const response = await axios.put(
-          'https://parkify-web-app-backend.onrender.com/api/auth/profile',
+          'http://localhost:2000/api/auth/profile',
           user,
           {
             headers: { Authorization: `Bearer ${token}` }

@@ -16,6 +16,10 @@ export default function Wallet() {
 
   const POINT_TO_DOLLAR = 0.01;
 
+  useEffect(() => {
+    setUserBalance(userScore * POINT_TO_DOLLAR);
+  }, [userScore]);
+
   const fetchWalletData = async () => {
     const email = localStorage.getItem('email');
     const token = localStorage.getItem('token');
@@ -26,15 +30,15 @@ export default function Wallet() {
     }
 
     try {
+      console.log(email, 'email')
       const res = await axios.get(
-        `https://parkify-web-app-backend.onrender.com/api/score/user/${encodeURIComponent(email)}`,
+        `http://localhost:2000/api/auth/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       console.log('✅ User API Response:', res.data);
-      setUserScore(res.data.totalScore || 0);
-      setUserBalance(res.data.totalBalance || 0);
+      setUserScore(res.data.score || 0);
       setUsername(res.data.username || localStorage.getItem('username') || 'User');
       setPaymentDetails(email);
     } catch (err) {
@@ -77,10 +81,10 @@ export default function Wallet() {
       return;
     }
 
-    if (amountFloat < 10) {
-      alert('⚠️ Minimum withdrawal amount is $10.');
-      return;
-    }
+    // if (amountFloat < 10) {
+    //   alert('⚠️ Minimum withdrawal amount is $10.');
+    //   return;
+    // }
 
     const pointsRequired = amountFloat / POINT_TO_DOLLAR;
 
@@ -97,7 +101,7 @@ export default function Wallet() {
       setIsProcessing(true);
       try {
         const res = await axios.post(
-          'https://parkify-web-app-backend.onrender.com/api/auth/cashout',
+          'http://localhost:2000/api/auth/cashout',
           {
             amount: amountFloat,
             paymentMethod,
@@ -107,9 +111,24 @@ export default function Wallet() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+
+        const userProfile = await axios.get(`http://localhost:2000/api/auth/profile`, 
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const existingScore = userProfile.data.score;
+        const remainingScore = existingScore - (amountFloat / POINT_TO_DOLLAR);
+        // // UPDATE POINTS IS USER PROFILE
+        await axios.put(`http://localhost:2000/api/auth/profile`, {
+          score: remainingScore
+        }, 
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         console.log('✅ Cash-out response:', res.data);
-        setUserScore(res.data.data.newPoints);
-        setUserBalance(res.data.data.newBalance);
+        setUserScore(res.data.data.newPoints || 0);
+        setUserBalance(res.data.data.newBalance || 0);
         setAmount('');
         alert(`✅ $${amountFloat} withdrawal successful!`);
         await fetchWalletData(); // Refresh wallet data

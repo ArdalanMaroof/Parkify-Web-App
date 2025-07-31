@@ -78,9 +78,9 @@ router.post('/add', async (req, res) => {
 
 router.get('/user/:email', async (req, res) => {
   const email = req.params.email.toLowerCase();
-
   try {
     const user = await User.findOne({ email }).select('email username totalScore totalBalance');
+    console.log(user, 'user')
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
