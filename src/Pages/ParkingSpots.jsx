@@ -59,6 +59,10 @@ const ParkingSpots = () => {
   const [parkedSpotId, setParkedSpotId] = useState(null);
   const [isProfileComplete, setIsProfileComplete] = useState(true);
 
+  // Add loading states to prevent multiple clicks
+  const [processingSpots, setProcessingSpots] = useState({}); // Track which spots are being processed
+  const [buttonStates, setButtonStates] = useState({}); // Track button states per spot
+
   const location = useLocation();
   const navigate = useNavigate();
   const [lastAction, setLastAction] = useState({});
@@ -67,7 +71,7 @@ const ParkingSpots = () => {
   const [activeSpotId, setActiveSpotId] = useState(null);
   const [popupPosition, setPopupPosition] = useState(null);
 
-  
+
   const [currentTheme, setCurrentTheme] = useState(() => {
     return document.body.getAttribute('data-theme') || 'light';
   });
@@ -88,6 +92,7 @@ const ParkingSpots = () => {
 
     return () => observer.disconnect();
   }, []);
+
   const query = new URLSearchParams(useLocation().search);
   const selectedArea = query.get('location') || 'All';
 
@@ -221,9 +226,44 @@ const ParkingSpots = () => {
     return spot.hasSpots ? blueIcon : redIcon;
   };
 
+  // Helper function to check if a spot action is already processed
+  const isSpotProcessed = (spotId, action) => {
+    return processingSpots[spotId]?.includes(action) || buttonStates[spotId]?.[action] === 'completed';
+  };
+
+  // Helper function to set processing state
+  const setSpotProcessing = (spotId, action, isProcessing) => {
+    setProcessingSpots(prev => ({
+      ...prev,
+      [spotId]: isProcessing
+        ? [...(prev[spotId] || []), action]
+        : (prev[spotId] || []).filter(a => a !== action)
+    }));
+  };
+
+  // Helper function to set button state
+  const setButtonState = (spotId, action, state) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [spotId]: {
+        ...prev[spotId],
+        [action]: state
+      }
+    }));
+  };
+
   const handleReportSubmit = async (spotId) => {
+    // Prevent multiple submissions
+    if (isSpotProcessed(spotId, 'report_spots')) {
+      console.log('Already processing report for spot:', spotId);
+      return;
+    }
+
     const num = parseInt(freeCounts[spotId]);
     if (!isNaN(num) && num >= 0) {
+      setSpotProcessing(spotId, 'report_spots', true);
+      setButtonState(spotId, 'report_spots', 'processing');
+
       try {
         await axios.put(`https://parkify-web-app-backend.onrender.com/api/free-parking/${spotId}`, {
           hasSpots: true,
@@ -233,6 +273,8 @@ const ParkingSpots = () => {
         const earned = num * 5;
         setPoints((prev) => prev + earned);
         setReportedSpots((prev) => ({ ...prev, [spotId]: true }));
+        setButtonState(spotId, 'report_spots', 'completed');
+
         submitPoints(earned, 'multi_spot_report');
         toast.success(`🎉 Thanks! You earned ${earned} points.`, {
           position: 'top-right',
@@ -240,10 +282,13 @@ const ParkingSpots = () => {
         });
       } catch (error) {
         console.error('Error updating spot:', error);
+        setButtonState(spotId, 'report_spots', 'error');
         toast.error('❌ Failed to update spot.', {
           position: 'top-right',
           autoClose: 2000,
         });
+      } finally {
+        setSpotProcessing(spotId, 'report_spots', false);
       }
     }
   };
@@ -436,14 +481,18 @@ const ParkingSpots = () => {
                           {!freeCounts[spot._id + '_confirmed'] ? (
                             <button
                               disabled={
-                                (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
+                                (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id ||
+                                isSpotProcessed(spot._id, 'spot_available')
                               }
                               onClick={async () => {
                                 if (
                                   !isProfileComplete ||
-                                  (!!parkedSpotId && parkedSpotId !== spot._id)
-                                )
-                                  return;
+                                  (!!parkedSpotId && parkedSpotId !== spot._id) ||
+                                  isSpotProcessed(spot._id, 'spot_available')
+                                ) return;
+
+                                setSpotProcessing(spot._id, 'spot_available', true);
+                                setButtonState(spot._id, 'spot_available', 'processing');
 
                                 try {
                                   await axios.put(
@@ -463,6 +512,8 @@ const ParkingSpots = () => {
                                     [spot._id + '_confirmed']: true,
                                   }));
                                   setPoints((prev) => prev + 5);
+                                  setButtonState(spot._id, 'spot_available', 'completed');
+
                                   //Give 5 points
                                   submitPoints(5, 'spot_available');
 
@@ -471,19 +522,22 @@ const ParkingSpots = () => {
                                     autoClose: 3000,
                                   });
                                 } catch (err) {
+                                  setButtonState(spot._id, 'spot_available', 'error');
                                   toast.error('❌ Error updating spot.', {
                                     position: 'top-right',
                                     autoClose: 3000,
                                   });
+                                } finally {
+                                  setSpotProcessing(spot._id, 'spot_available', false);
                                 }
                               }}
-                              className={`popup-btn btn-available ${
-                                (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
-                                  ? 'btn-disabled'
-                                  : ''
-                              }`}
+                              className={`popup-btn btn-available ${((!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id) ||
+                                isSpotProcessed(spot._id, 'spot_available')
+                                ? 'btn-disabled'
+                                : ''
+                                }`}
                             >
-                              ✅ Spot Available
+                              {buttonStates[spot._id]?.spot_available === 'processing' ? '⏳ Processing...' : '✅ Spot Available'}
                             </button>
                           ) : (
                             <div className="more-spots-section">
@@ -500,28 +554,31 @@ const ParkingSpots = () => {
                                   }))
                                 }
                                 className="popup-input"
+                                disabled={isSpotProcessed(spot._id, 'report_spots')}
                               />
                               <button
                                 disabled={
-                                  (!isProfileComplete || !!parkedSpotId) &&
-                                  parkedSpotId !== spot._id
+                                  ((!isProfileComplete || !!parkedSpotId) &&
+                                    parkedSpotId !== spot._id) ||
+                                  isSpotProcessed(spot._id, 'report_spots')
                                 }
                                 onClick={() => {
                                   if (
                                     !isProfileComplete ||
-                                    (!!parkedSpotId && parkedSpotId !== spot._id)
+                                    (!!parkedSpotId && parkedSpotId !== spot._id) ||
+                                    isSpotProcessed(spot._id, 'report_spots')
                                   )
                                     return;
                                   handleReportSubmit(spot._id);
                                 }}
-                                className={`popup-btn btn-report ${
-                                  (!isProfileComplete || !!parkedSpotId) &&
-                                  parkedSpotId !== spot._id
-                                    ? 'btn-disabled'
-                                    : ''
-                                }`}
+                                className={`popup-btn btn-report ${((!isProfileComplete || !!parkedSpotId) &&
+                                  parkedSpotId !== spot._id) ||
+                                  isSpotProcessed(spot._id, 'report_spots')
+                                  ? 'btn-disabled'
+                                  : ''
+                                  }`}
                               >
-                                📊 Report More Spots
+                                {buttonStates[spot._id]?.report_spots === 'processing' ? '⏳ Processing...' : '📊 Report More Spots'}
                               </button>
                             </div>
                           )}
@@ -538,42 +595,52 @@ const ParkingSpots = () => {
                               }))
                             }
                             className="popup-input"
+                            disabled={isSpotProcessed(spot._id, 'report_spots')}
                           />
                           <button
                             disabled={
-                              (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
+                              ((!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id) ||
+                              isSpotProcessed(spot._id, 'report_spots')
                             }
                             onClick={() => {
                               if (
                                 !isProfileComplete ||
-                                (!!parkedSpotId && parkedSpotId !== spot._id)
+                                (!!parkedSpotId && parkedSpotId !== spot._id) ||
+                                isSpotProcessed(spot._id, 'report_spots')
                               )
                                 return;
                               handleReportSubmit(spot._id);
                             }}
-                            className={`popup-btn btn-report ${
-                              (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
-                                ? 'btn-disabled'
-                                : ''
-                            }`}
+                            className={`popup-btn btn-report ${((!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id) ||
+                              isSpotProcessed(spot._id, 'report_spots')
+                              ? 'btn-disabled'
+                              : ''
+                              }`}
                           >
-                            📊 Report Available Spots
+                            {buttonStates[spot._id]?.report_spots === 'processing' ? '⏳ Processing...' : '📊 Report Available Spots'}
                           </button>
+
                           {/* Only show "Mark as Full" if not already full */}
                           {!reportedSpots[spot._id] && spot.hasSpots && (
                             <>
                               <p className="popup-text full-question">Is this lot full?</p>
                               <button
                                 disabled={
-                                  (!isProfileComplete || !!parkedSpotId) &&
-                                  parkedSpotId !== spot._id
+                                  ((!isProfileComplete || !!parkedSpotId) &&
+                                    parkedSpotId !== spot._id) ||
+                                  isSpotProcessed(spot._id, 'mark_full')
                                 }
                                 onClick={async () => {
                                   if (
                                     !isProfileComplete ||
-                                    (!!parkedSpotId && parkedSpotId !== spot._id)
+                                    (!!parkedSpotId && parkedSpotId !== spot._id) ||
+                                    isSpotProcessed(spot._id, 'mark_full')
                                   )
                                     return;
+
+                                  setSpotProcessing(spot._id, 'mark_full', true);
+                                  setButtonState(spot._id, 'mark_full', 'processing');
+
                                   try {
                                     await axios.put(
                                       `https://parkify-web-app-backend.onrender.com/api/free-parking/${spot._id}`,
@@ -591,23 +658,27 @@ const ParkingSpots = () => {
                                       ...prev,
                                       [spot._id]: true,
                                     }));
+                                    setButtonState(spot._id, 'mark_full', 'completed');
                                     submitPoints(5, 'marked_full');
                                   } catch (err) {
+                                    setButtonState(spot._id, 'mark_full', 'error');
                                     toast.error('❌ Failed to report full status.', {
                                       position: 'top-right',
                                       autoClose: 3000,
                                     });
                                     console.error(err);
+                                  } finally {
+                                    setSpotProcessing(spot._id, 'mark_full', false);
                                   }
                                 }}
-                                className={`popup-btn btn-full ${
-                                  (!isProfileComplete || !!parkedSpotId) &&
-                                  parkedSpotId !== spot._id
-                                    ? 'btn-disabled'
-                                    : ''
-                                }`}
+                                className={`popup-btn btn-full ${((!isProfileComplete || !!parkedSpotId) &&
+                                  parkedSpotId !== spot._id) ||
+                                  isSpotProcessed(spot._id, 'mark_full')
+                                  ? 'btn-disabled'
+                                  : ''
+                                  }`}
                               >
-                                ❌ Mark as Full
+                                {buttonStates[spot._id]?.mark_full === 'processing' ? '⏳ Processing...' : '❌ Mark as Full'}
                               </button>
                             </>
                           )}
@@ -697,11 +768,10 @@ const ParkingSpots = () => {
                         disabled={
                           (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
                         }
-                        className={`popup-btn btn-confirm-parking ${
-                          (!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
+                        className={`popup-btn btn-confirm-parking ${(!isProfileComplete || !!parkedSpotId) && parkedSpotId !== spot._id
                             ? 'btn-disabled'
                             : ''
-                        }`}
+                          }`}
                       >
                         Yes, I'm parking here
                       </button>
