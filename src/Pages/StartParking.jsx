@@ -18,6 +18,13 @@ const StartParking = () => {
     document.body.classList.remove('light', 'dark');
     document.body.classList.add(theme);
   }, [theme]);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login'); 
+    }
+  }, []);
+
 
   const cities = [
     'Vancouver',
