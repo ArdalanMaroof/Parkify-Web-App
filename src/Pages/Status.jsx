@@ -27,7 +27,7 @@ const Status = () => {
 
           try {
             // 1. Save to confirmed-parking collection
-            await axios.post('http://localhost:5000/api/confirmed-parking', {
+            await axios.post('https://parkify-web-app-backend.onrender.com//api/confirmed-parking', {
               userId: localStorage.getItem('userId'),
               spotId: spot._id,
               spotName: spot.name,
@@ -41,7 +41,7 @@ const Status = () => {
             //  2. Update free-parking to decrease availability
             const newCount = Math.max((spot.availableSpots || 1) - 1, 0);
             await axios.put(
-              `http://localhost:5000/api/free-parking/${spot._id}`,
+              `https://parkify-web-app-backend.onrender.com//api/free-parking/${spot._id}`,
               {
                 availableSpots: newCount,
                 hasSpots: newCount > 0,
@@ -63,7 +63,7 @@ const Status = () => {
       try {
         const userId = localStorage.getItem('userId');
         const res = await axios.get(
-          'http://localhost:5000/api/confirmed-parking/active',
+          'https://parkify-web-app-backend.onrender.com//api/confirmed-parking/active',
           {
             params: { userId },
           }
@@ -91,7 +91,7 @@ const Status = () => {
       try {
         const userId = localStorage.getItem('userId');
         const res = await axios.get(
-          'http://localhost:5000/api/confirmed-parking',
+          'https://parkify-web-app-backend.onrender.com//api/confirmed-parking',
           {
             params: { userId },
           }
@@ -149,7 +149,7 @@ const Status = () => {
     try {
       // Step 1: Mark the parking spot as available
       await axios.put(
-        `http://localhost:5000/api/free-parking/${confirmedSpotId}`,
+        `https://parkify-web-app-backend.onrender.com//api/free-parking/${confirmedSpotId}`,
         {
           hasSpots: true,
           availableSpots: 1,
@@ -158,7 +158,7 @@ const Status = () => {
 
       //  Step 2: Mark the session inactive in the database
       await axios.patch(
-        `http://localhost:5000/api/confirmed-parking/${activeSession._id}/deactivate`
+        `https://parkify-web-app-backend.onrender.com//api/confirmed-parking/${activeSession._id}/deactivate`
       );
 
       // Step 3: Clean up local state and storage
@@ -171,7 +171,7 @@ const Status = () => {
       // Step 4: Reload full history
       try {
         const res = await axios.get(
-          'http://localhost:5000/api/confirmed-parking',
+          'https://parkify-web-app-backend.onrender.com//api/confirmed-parking',
           {
             params: { userId: localStorage.getItem('userId') },
           }

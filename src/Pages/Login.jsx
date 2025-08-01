@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+//import { ThemeContext } from '../context/ThemeContext'; // Import ThemeContext
 import 'react-toastify/dist/ReactToastify.css';
+import './auth.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,7 +16,10 @@ export default function Login() {
     e.preventDefault(); // Prevent form submission from reloading page
 
     if (!email || !password) {
-      toast.warn('Please enter both email and password.');
+      toast.warn('Please enter both email and password.', {
+       // position: 'top-right',
+        autoClose: 2500,
+      });
       return;
     }
 
@@ -32,23 +37,43 @@ export default function Login() {
       localStorage.setItem('username', res.data.data.name);
 
       toast.success(`🎉 Welcome back, ${res.data.data.name.split(' ')[0]}!`, {
-        position: 'top-right',
-        autoClose: 3000,
+        //position: 'top-right',
+        autoClose: 2500,
       });
 
       navigate('/home');
     } catch (err) {
       console.error('Login error:', err.response?.data || err.message);
-      toast.error('Login failed. Please check your credentials.');
+      
+      const errorMessage = err.response?.data?.message || err.message;
+      if (errorMessage.includes('password')) {
+        toast.error('Invalid password. Please ensure it meets the requirements.', {
+          position: 'top-right',
+          autoClose: 2500,
+        });
+      } else if (errorMessage.includes('email') || errorMessage.includes('user')) {
+        toast.error('Invalid email. Please check your email address.', {
+          position: 'top-right',
+          autoClose: 2500,
+        });
+      } else {
+        toast.error('Login failed. Please check your credentials.', {
+         // position: 'top-right',
+          autoClose: 2500,
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
+
     <div className="auth-container fade-in-up">
       <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
       <h2>Welcome back, park without stress.</h2>
+
+      {loading && <div className="spinner" aria-live="polite"></div>}
 
       <form className="auth-form" onSubmit={handleLogin}>
         <input

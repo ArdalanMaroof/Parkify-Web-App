@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from './component/BottomNav';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
+//import { ThemeContext } from '../context/ThemeContext';
 import 'react-toastify/dist/ReactToastify.css';
 import './Wallet.css';
 
@@ -29,14 +30,17 @@ export default function Wallet() {
     const token = localStorage.getItem('token');
 
     if (!email || !token) {
-      toast.warn('⚠️ Missing email or token in localStorage.');
+      toast.warn('⚠️ Missing email or token in localStorage.', {
+        position: 'top-center',
+        autoClose: 2500,
+      });
       return;
     }
 
      try {
       console.log(email, 'email')
       const res = await axios.get(
-        `http://localhost:5000/api/auth/profile`,
+        `https://parkify-web-app-backend.onrender.com//api/auth/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -134,17 +138,26 @@ export default function Wallet() {
     const email = localStorage.getItem('email');
 
     if (!email) {
-      toast.warn('⚠️ User email not found. Please log in again.');
+      toast.warn('⚠️ User email not found. Please log in again.', {
+        position: 'top-center',
+        autoClose: 2500,
+      });
       return;
     }
 
     if (isNaN(amountFloat) || amountFloat <= 0) {
-      toast.warn('⚠️ Please enter a valid withdrawal amount.');
+      toast.warn('⚠️ Please enter a valid withdrawal amount.', {
+        position: 'top-center',
+        autoClose: 2500,
+      });
       return;
     }
 
     if (!paymentDetails) {
-      toast.warn(`⚠️ Please enter a valid ${paymentMethod === 'email' ? 'email' : 'phone number'}.`);
+      toast.warn(`⚠️ Please enter a valid ${paymentMethod === 'email' ? 'email' : 'phone number'}.`, {
+        position: 'top-center',
+        autoClose: 2500,
+      });
       return;
     }
 
@@ -152,7 +165,10 @@ export default function Wallet() {
     const pointsRequired = amountFloat / POINT_TO_DOLLAR;
 
     if (userScore < pointsRequired) {
-      toast.error(`❌ You need at least ${pointsRequired.toLocaleString()} points to withdraw $${amountFloat}.`);
+      toast.error(`❌ You need at least ${pointsRequired.toLocaleString()} points to withdraw $${amountFloat}.`, {
+        position: 'top-center',
+        autoClose: 2500,
+      });
       return;
     }
 
@@ -164,7 +180,7 @@ export default function Wallet() {
       setIsProcessing(true);
       try {
         const res = await axios.post(
-          'http://localhost:5000/api/auth/cashout',
+          'https://parkify-web-app-backend.onrender.com//api/auth/cashout',
           {
             amount: amountFloat,
             paymentMethod,
@@ -175,7 +191,7 @@ export default function Wallet() {
           }
         );
 
-        const userProfile = await axios.get(`http://localhost:5000/api/auth/profile`, 
+        const userProfile = await axios.get(`https://parkify-web-app-backend.onrender.com//api/auth/profile`, 
         {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -183,7 +199,7 @@ export default function Wallet() {
         const existingScore = userProfile.data.score;
         const remainingScore = existingScore - (amountFloat / POINT_TO_DOLLAR);
         // // UPDATE POINTS IS USER PROFILE
-        await axios.put(`http://localhost:5000/api/auth/profile`, {
+        await axios.put(`https://parkify-web-app-backend.onrender.com//api/auth/profile`, {
           score: remainingScore
         }, 
         {
@@ -194,11 +210,17 @@ export default function Wallet() {
         setUserBalance(res.data.data.newBalance || 0);
         setAmount('');
         setPaymentDetails('');
-        toast.success(`✅ $${amountFloat} withdrawal successful!`);
+        toast.success(`✅ $${amountFloat} withdrawal successful!`, {
+          position: 'top-center',
+          autoClose: 2500,
+        });
         await fetchWalletData(); // Refresh wallet data
       } catch (err) {
         console.error('❌ Cash-out error:', err.message);
-        alert('Failed to process cash-out: ' + (err.response?.data?.message || err.message));
+        toast.error('Failed to process cash-out: ' + (err.response?.data?.message || err.message), {
+          position: 'top-center',
+          autoClose: 2500,
+        });
       } finally {
         setIsProcessing(false);
       }
@@ -206,29 +228,7 @@ export default function Wallet() {
   };
 
   return (
-    <>
-    <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        toastStyle={{
-          backgroundColor: '#ffffff',
-          color: '#1a1a1a',
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          fontFamily: 'Poppins, sans-serif',
-        }}
-        progressStyle={{
-          background: '#5c2ed6',
-        }}
-      />
+    
     <div className="wallet-container">
       <div className="wallet-content">
         <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
@@ -285,6 +285,5 @@ export default function Wallet() {
       </div>
       <BottomNav />
     </div>
-    </>
   );
 }

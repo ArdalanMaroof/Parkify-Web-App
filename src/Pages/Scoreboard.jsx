@@ -16,7 +16,7 @@ export default function Scoreboard() {
       setError(null);
       try {
     console.log('📤 Fetching top scores from backend...');
-    const res = await axios.get('http://localhost:5000/api/score/top');
+    const res = await axios.get('https://parkify-web-app-backend.onrender.com//api/score/top');
     console.log('✅ Received scores:', res.data);
         setScores(res.data);
       } catch(err) {

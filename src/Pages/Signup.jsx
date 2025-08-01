@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './auth.css';
 
 export default function Signup() {
@@ -32,7 +33,7 @@ export default function Signup() {
     setLoading(true); // Show loading spinner
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/signup', {
+      const res = await axios.post('https://parkify-web-app-backend.onrender.com//api/auth/signup', {
         name: trimmedName,
         email: trimmedEmail,
         password: trimmedPassword,
@@ -59,7 +60,7 @@ export default function Signup() {
     <div className="auth-container fade-in-up">
       <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
       <h2>🚀 Sign up now and never circle the block again.</h2>
-      {loading && <div className="spinner"></div>} {/* Loading spinner */}
+      {loading && <div className="spinner" aria-live="polite"></div>}
       <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
         <input
           className="auth-input"
