@@ -41,7 +41,7 @@ export default function Signup() {
 
       // Improved success message
       toast.success(`🎉 Account created successfully! Welcome to Parkify, ${trimmedName.split(' ')[0]}! Please login with your credentials.`, {
-        autoClose: 4000, // Give user more time to read
+        autoClose: 2500, // Give user more time to read
       });
       
       // Small delay before redirecting to let user read the message
