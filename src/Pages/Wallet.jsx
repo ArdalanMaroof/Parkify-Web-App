@@ -25,7 +25,7 @@ export default function Wallet() {
       return;
     }
 
-    const url = `https://parkify-5cf7.onrender.com/api/score/user/${email}`;
+    const url = `http://localhost:5000/api/score/user/${email}`;
     console.log('📤 Sending request to:', url);
 
     setLoading(true);

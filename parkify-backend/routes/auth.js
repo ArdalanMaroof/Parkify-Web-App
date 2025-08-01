@@ -34,27 +34,42 @@ router.post("/signup", async (req, res) => {
             email: email.toLowerCase(),
             password: hashedPassword,
             isFirstLogin: true,
+            score: 0,
+            //balance: 0,
             
         });
 
         // Save user to the database
         const savedUser = await newUser.save();
-        console.log("✅ User created:", savedUser);
+        console.log('✅ User created with initial values:', {
+          _id: savedUser._id.toString(),
+      email: savedUser.email,
+      score: savedUser.score,
+      //balance: savedUser.balance,
+
+        });
 
         // Return response (excluding password)
         res.status(201).json({
             message: "User created successfully",
             data: {
-                id: savedUser._id,
+                id: savedUser._id.toString(),
                 name: savedUser.name,
                 email: savedUser.email,
+                score: savedUser.score,
+                //balance: savedUser.balance,
                 createdAt: savedUser.createdAt
             },
         });
 
     } catch (err) {
         // Handle database/server errors
-        console.error("❌ Error saving user:", err);
+        console.error("❌ Error saving user:", {
+          message: err.message,
+          stack: err.stack,
+          code: err.code,
+
+        });
         res.status(500).json({
             error: "Signup failed",
             message: err.message,
@@ -112,7 +127,7 @@ router.post("/login", async (req, res) => {
             {
                 name: foundUser.name,
                 email: foundUser.email,
-                id: foundUser._id,
+                id: foundUser._id.toString(),
                 isFirstLogin: isFirstLogin
 
             },
@@ -124,7 +139,7 @@ router.post("/login", async (req, res) => {
         console.log("👉 Login response:", {
             token: accessToken,
             data: {
-                id: foundUser._id,
+                id: foundUser._id.toString(),
                 name: foundUser.name,
                 email: foundUser.email,
                 isFirstLogin: isFirstLogin
@@ -136,7 +151,7 @@ router.post("/login", async (req, res) => {
         return res.status(200).json({
             token: accessToken,
             data: {
-                id: foundUser._id,
+                id: foundUser._id.toString(),
                 name: foundUser.name,
                 email: foundUser.email,
                 isFirstLogin: isFirstLogin
@@ -184,7 +199,13 @@ router.get("/profile", async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Return the user data
-    res.status(200).json(user);
+    res.status(200).json({
+      ...user.toObject(),
+      id: user._id.toString(),
+      score: user.score,
+      //balance: user.balance,
+
+    });
     
   } catch (err) {
     // If token verification fails or any other error occurs, respond with 500
@@ -212,12 +233,12 @@ router.put("/profile", async (req, res) => {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
     // Extract the new profile data from the request body, excluding email
-    const { name, phoneNumber, vehicleNumber } = req.body;
+    const { name, phoneNumber, vehicleNumber, score } = req.body;
 
     // Find the user by the decoded email and update the profile fields
     const updatedUser = await User.findByIdAndUpdate(
-        decoded.id ,
-      { name, phoneNumber, vehicleNumber, isFirstLogin: false },
+      { email: decoded.email} ,
+      { name, phoneNumber, vehicleNumber, isFirstLogin: false, score },
       { new: true, runValidators: true, select: '-password' }
     );
 
@@ -227,7 +248,10 @@ router.put("/profile", async (req, res) => {
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
     
     // Send back a success message with the updated user data
-    res.status(200).json({ message: "Profile updated successfully", data: updatedUser});
+    res.status(200).json({ 
+      message: "Profile updated successfully", 
+      data: { ...updatedUser.toObject(), id: updatedUser._id.toString()},
+    });
   
   } catch (err) {
 
@@ -249,10 +273,8 @@ router.post("/cashout", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    const user = await User.findById(decoded.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
     const { amount, paymentMethod, paymentDetails } = req.body;
+
     if (!amount || !paymentMethod || !paymentDetails) {
       return res.status(400).json({ message: "Amount, payment method, and details are required" });
     }
@@ -261,29 +283,44 @@ router.post("/cashout", async (req, res) => {
     const pointsPerDollar = 100; // 100 points = $1
     const pointsRequired = amountNum * pointsPerDollar;
 
-    if (user.score < pointsRequired) {
+
+    let user = await User.findOne({ email: decoded.email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.core < pointsRequired) {
       return res.status(400).json({ message: "Insufficient points for cash-out" });
     }
 
-    if (amountNum < 10) {
-      return res.status(400).json({ message: "Minimum cash-out amount is $10" });
+    if (amountNum < 0) {
+      return res.status(400).json({ message: "Minimum cash-out amount is not available" });
     }
 
     // Deduct points and add to balance (for simplicity, assume balance is updated after external processing)
-    user.score -= pointsRequired;
-    user.balance += amountNum; // Temporary balance update (in real app, this would be handled after payment confirmation)
+    user.totalScore -= pointsRequired;
+    user.totalBalance = user.totalScore * 0.01; // Temporary balance update (in real app, this would be handled after payment confirmation)
     await user.save();
+    console.log('✅ User updated after cash-out:', {
+      email: user.email,
+      totalScore: user.totalScore,
+      totalBalance: user.totalBalance,
+    });
 
-    // In a real app, integrate with PayPal or bank transfer API here
+    
     res.status(200).json({
       message: "Cash-out request processed successfully",
       data: {
-        newPoints: user.score,
-        newBalance: user.balance,
+        newPoints: user.totalScore,
+        newBalance: user.totalBalance,
       },
     });
   } catch (err) {
-    console.error("❌ Cash-out error:", err);
+    console.error("❌ Cash-out error:", {
+      message: err.message,
+      stack: err.stack,
+      code: err.code,
+    });
     res.status(500).json({ message: "Cash-out failed", error: err.message });
   }
 });
