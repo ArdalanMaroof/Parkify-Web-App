@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from './component/BottomNav';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './Wallet.css';
 
 export default function Wallet() {
@@ -27,7 +29,7 @@ export default function Wallet() {
     const token = localStorage.getItem('token');
 
     if (!email || !token) {
-      console.warn('⚠️ Missing email or token in localStorage.');
+      toast.warn('⚠️ Missing email or token in localStorage.');
       return;
     }
 
@@ -73,23 +75,76 @@ export default function Wallet() {
     setPaymentDetails('');
   }, [paymentMethod]);
 
+   // Custom confirmation toast
+  const confirmToast = (message) =>
+    new Promise((resolve) => {
+      const ConfirmToast = () => (
+        <div>
+          <p>{message}</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
+              style={{
+                background: '#28a745',
+                color: 'white',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                toast.dismiss();
+                resolve(true);
+              }}
+            >
+              Confirm
+            </button>
+            <button
+              style={{
+                background: '#dc3545',
+                color: 'white',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                toast.dismiss();
+                resolve(false);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      );
+
+      toast(<ConfirmToast />, {
+        position: 'top-center',
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+      });
+    });
+
+
   const handleWithdraw = async () => {
     const amountFloat = parseFloat(amount);
     const token = localStorage.getItem('token');
     const email = localStorage.getItem('email');
 
     if (!email) {
-      alert('⚠️ User email not found. Please log in again.');
+      toast.warn('⚠️ User email not found. Please log in again.');
       return;
     }
 
     if (isNaN(amountFloat) || amountFloat <= 0) {
-      alert('⚠️ Please enter a valid withdrawal amount.');
+      toast.warn('⚠️ Please enter a valid withdrawal amount.');
       return;
     }
 
     if (!paymentDetails) {
-      alert(`⚠️ Please enter a valid ${paymentMethod === 'email' ? 'email' : 'phone number'}.`);
+      toast.warn(`⚠️ Please enter a valid ${paymentMethod === 'email' ? 'email' : 'phone number'}.`);
       return;
     }
 
@@ -97,11 +152,11 @@ export default function Wallet() {
     const pointsRequired = amountFloat / POINT_TO_DOLLAR;
 
     if (userScore < pointsRequired) {
-      alert(`❌ You need at least ${pointsRequired.toLocaleString()} points to withdraw $${amountFloat}.`);
+      toast.error(`❌ You need at least ${pointsRequired.toLocaleString()} points to withdraw $${amountFloat}.`);
       return;
     }
 
-    const confirmWithdraw = window.confirm(
+    const confirmWithdraw = await confirmToast(
       `Are you sure you want to withdraw $${amountFloat} (${pointsRequired.toLocaleString()} points)?`
     );
 
@@ -138,7 +193,8 @@ export default function Wallet() {
         setUserScore(res.data.data.newPoints || 0);
         setUserBalance(res.data.data.newBalance || 0);
         setAmount('');
-        alert(`✅ $${amountFloat} withdrawal successful!`);
+        setPaymentDetails('');
+        toast.success(`✅ $${amountFloat} withdrawal successful!`);
         await fetchWalletData(); // Refresh wallet data
       } catch (err) {
         console.error('❌ Cash-out error:', err.message);
@@ -150,6 +206,29 @@ export default function Wallet() {
   };
 
   return (
+    <>
+    <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastStyle={{
+          backgroundColor: '#ffffff',
+          color: '#1a1a1a',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+        progressStyle={{
+          background: '#5c2ed6',
+        }}
+      />
     <div className="wallet-container">
       <div className="wallet-content">
         <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
@@ -206,5 +285,6 @@ export default function Wallet() {
       </div>
       <BottomNav />
     </div>
+    </>
   );
 }

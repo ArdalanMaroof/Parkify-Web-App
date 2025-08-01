@@ -40,13 +40,13 @@ const BottomNav = () => {
           className={`nav-icon ${isActive("/home") ? "active" : ""}`}
           onClick={() => navigate("/home")}
         >
-          <MdHome size={24} />
+          <MdHome size={50} />
         </div>
         <div
           className={`nav-icon ${isActive("/status") ? "active" : ""}`}
           onClick={() => navigate("/status")}
         >
-          <MdCarRental size={24} />
+          <MdCarRental size={50} />
         </div>
 
         <div className="nav-icon spacer" /> {/* Empty middle spacer for FAB */}
@@ -55,13 +55,13 @@ const BottomNav = () => {
           className={`nav-icon ${isActive("/Wallet") ? "active" : ""}`}
           onClick={() => navigate("/Wallet")}
         >
-          <MdAccountBalanceWallet size={24} />
+          <MdAccountBalanceWallet size={50} />
         </div>
         <div
           className={`nav-icon ${isActive("/profile") ? "active" : ""}`}
           onClick={() => navigate("/profile")}
         >
-          <MdPerson size={24} />
+          <MdPerson size={50} />
         </div>
       </div>
     </div>
