@@ -1,26 +1,29 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import './BottomNav.css';
+import { MdHome, MdCarRental, MdAccountBalanceWallet, MdPerson } from "react-icons/md";
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname.toLowerCase();
 
-  const isActive = (path) => currentPath === path;
+  const isActive = (path) => currentPath === path.toLowerCase;
 
-  const navItems = [
+  /*const navItems = [
     { path: "/home", icon: "🏠", label: "Home" },
     { path: "/status", icon: "🚗", label: "Status" },
     { path: "/wallet", icon: "💳", label: "Wallet" },
     { path: "/profile", icon: "👤", label: "Profile" }
   ];
+  */
 
   const handleNavClick = (path) => {
     navigate(path);
   };
 
   return (
+    
     <div className="nav-wrapper">
       {/* Floating Trophy Button */}
       <div className="fab-container" onClick={() => handleNavClick("/scoreboard")}>
@@ -33,22 +36,33 @@ const BottomNav = () => {
 
       {/* Bottom Navigation */}
       <div className="bottom-nav">
-        <div className="nav-backdrop" />
-        {navItems.map((item, index) => (
-          <React.Fragment key={item.path}>
-            {index === 2 && <div className="nav-spacer" />} {/* For FAB spacing */}
-            <div
-              className={`nav-item ${isActive(item.path) ? "active" : ""}`}
-              onClick={() => handleNavClick(item.path)}
-            >
-              <div className="nav-icon-wrapper">
-                <span className="nav-icon">{item.icon}</span>
-                {isActive(item.path) && <div className="nav-indicator" />}
-              </div>
-              <span className="nav-label">{item.label}</span>
-            </div>
-          </React.Fragment>
-        ))}
+        <div
+          className={`nav-icon ${isActive("/home") ? "active" : ""}`}
+          onClick={() => navigate("/home")}
+        >
+          <MdHome size={24} />
+        </div>
+        <div
+          className={`nav-icon ${isActive("/status") ? "active" : ""}`}
+          onClick={() => navigate("/status")}
+        >
+          <MdCarRental size={24} />
+        </div>
+
+        <div className="nav-icon spacer" /> {/* Empty middle spacer for FAB */}
+
+        <div
+          className={`nav-icon ${isActive("/Wallet") ? "active" : ""}`}
+          onClick={() => navigate("/Wallet")}
+        >
+          <MdAccountBalanceWallet size={24} />
+        </div>
+        <div
+          className={`nav-icon ${isActive("/profile") ? "active" : ""}`}
+          onClick={() => navigate("/profile")}
+        >
+          <MdPerson size={24} />
+        </div>
       </div>
     </div>
   );

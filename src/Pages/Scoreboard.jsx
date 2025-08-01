@@ -6,19 +6,29 @@ import BottomNav from './component/BottomNav';
 
 export default function Scoreboard() {
   const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchTopScores = async () => {
+    setLoading(true);
+      setError(null);
+      try {
     console.log('📤 Fetching top scores from backend...');
-    axios
-      .get('http://localhost:5000/api/score/top')
-      .then((res) => {
-        console.log('✅ Received scores:', res.data);
+    const res = await axios.get('http://localhost:5000/api/score/top');
+    console.log('✅ Received scores:', res.data);
         setScores(res.data);
-      })
-      .catch((err) => {
-        console.error('❌ Error fetching scores', err);
-      });
+      } catch(err) {
+        
+        console.error('❌ Error fetching scores:', err);
+        setError('Failed to load leaderboard. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopScores();
   }, []);
 
   return (
