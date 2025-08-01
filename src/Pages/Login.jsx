@@ -26,7 +26,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post('https://parkify-5cf7.onrender.com/api/auth/login', {
+      const res = await axios.post('https://parkify-web-app-backend.onrender.com/api/auth/login', {
         email: email.toLowerCase(),
         password,
       });
