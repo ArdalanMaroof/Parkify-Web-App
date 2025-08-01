@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+//import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify';
 import './auth.css';
 
 export default function Signup() {
@@ -57,6 +58,30 @@ export default function Signup() {
   };
 
   return (
+    <>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastStyle={{
+          backgroundColor: '#ffffff',
+          color: '#1a1a1a',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+        progressStyle={{
+          background: '#5c2ed6',
+        }}
+      />
     <div className="auth-container fade-in-up">
       <img src="/Parkify-logo.jpg" alt="Parkify Logo" className="logo" />
       <h2>🚀 Sign up now and never circle the block again.</h2>
@@ -94,5 +119,6 @@ export default function Signup() {
         Already have an account? <Link to="/login">Login</Link>
       </p>
     </div>
+    </>
   );
 }
