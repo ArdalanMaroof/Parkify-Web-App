@@ -40,7 +40,7 @@ export default function Wallet() {
      try {
       console.log(email, 'email')
       const res = await axios.get(
-        `https://parkify-web-app-backend.onrender.com//api/auth/profile`,
+        `https://parkify-web-app-backend.onrender.com/api/auth/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -180,7 +180,7 @@ export default function Wallet() {
       setIsProcessing(true);
       try {
         const res = await axios.post(
-          'https://parkify-web-app-backend.onrender.com//api/auth/cashout',
+          'https://parkify-web-app-backend.onrender.com/api/auth/cashout',
           {
             amount: amountFloat,
             paymentMethod,
@@ -191,7 +191,7 @@ export default function Wallet() {
           }
         );
 
-        const userProfile = await axios.get(`https://parkify-web-app-backend.onrender.com//api/auth/profile`, 
+        const userProfile = await axios.get(`https://parkify-web-app-backend.onrender.com/api/auth/profile`, 
         {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -199,7 +199,7 @@ export default function Wallet() {
         const existingScore = userProfile.data.score;
         const remainingScore = existingScore - (amountFloat / POINT_TO_DOLLAR);
         // // UPDATE POINTS IS USER PROFILE
-        await axios.put(`https://parkify-web-app-backend.onrender.com//api/auth/profile`, {
+        await axios.put(`https://parkify-web-app-backend.onrender.com/api/auth/profile`, {
           score: remainingScore
         }, 
         {
