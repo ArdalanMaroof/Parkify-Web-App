@@ -183,14 +183,14 @@ const ParkingSpots = () => {
     }
 
     try {
-      const userProfile = await axios.get(`http://localhost:2000/api/auth/profile`, 
+      const userProfile = await axios.get(`http://localhost:5000/api/auth/profile`, 
         {
           headers: { Authorization: `Bearer ${token}` }
         });
 
       const existingScore = userProfile.data.score;
         
-      const response = await axios.put(`http://localhost:2000/api/auth/profile`, {
+      const response = await axios.put(`http://localhost:5000/api/auth/profile`, {
         score: existingScore + points
       }, 
       {

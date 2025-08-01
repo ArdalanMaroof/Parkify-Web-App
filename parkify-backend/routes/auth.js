@@ -236,7 +236,7 @@ router.put("/profile", async (req, res) => {
     const { name, phoneNumber, vehicleNumber, score } = req.body;
 
     // Find the user by the decoded email and update the profile fields
-    const updatedUser = await User.findByIdAndUpdate(
+    const updatedUser = await User.findOneAndUpdate(
       { email: decoded.email} ,
       { name, phoneNumber, vehicleNumber, isFirstLogin: false, score },
       { new: true, runValidators: true, select: '-password' }
