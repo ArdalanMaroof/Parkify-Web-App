@@ -105,7 +105,7 @@ const ParkingSpots = () => {
 
     if (token) {
       axios
-        .get('https://parkify-web-app-backend.onrender.com//api/auth/profile', {
+        .get('https://parkify-web-app-backend.onrender.com/api/auth/profile', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -121,7 +121,7 @@ const ParkingSpots = () => {
 
     if (userId) {
       axios
-        .get('https://parkify-web-app-backend.onrender.com//api/confirmed-parking/active', {
+        .get('https://parkify-web-app-backend.onrender.com/api/confirmed-parking/active', {
           params: { userId },
         })
         .then((res) => {
@@ -155,7 +155,7 @@ const ParkingSpots = () => {
 
   const fetchSpots = async () => {
     try {
-      const res = await axios.get('https://parkify-web-app-backend.onrender.com//api/free-parking');
+      const res = await axios.get('https://parkify-web-app-backend.onrender.com/api/free-parking');
       setAllSpots(res.data);
     } catch (err) {
       console.error('Error fetching spots from DB', err);
@@ -183,14 +183,14 @@ const ParkingSpots = () => {
     }
 
     try {
-      const userProfile = await axios.get(`https://parkify-web-app-backend.onrender.com//api/auth/profile`, 
+      const userProfile = await axios.get(`https://parkify-web-app-backend.onrender.com/api/auth/profile`, 
         {
           headers: { Authorization: `Bearer ${token}` }
         });
 
       const existingScore = userProfile.data.score;
         
-      const response = await axios.put(`https://parkify-web-app-backend.onrender.com//api/auth/profile`, {
+      const response = await axios.put(`https://parkify-web-app-backend.onrender.com/api/auth/profile`, {
         score: existingScore + points
       }, 
       {
@@ -277,7 +277,7 @@ const ParkingSpots = () => {
       setButtonState(spotId, 'report_spots', 'processing');
 
       try {
-        await axios.put(`https://parkify-web-app-backend.onrender.com//api/free-parking/${spotId}`, {
+        await axios.put(`https://parkify-web-app-backend.onrender.com/api/free-parking/${spotId}`, {
           hasSpots: true,
           availableSpots: num,
         });
@@ -508,7 +508,7 @@ const ParkingSpots = () => {
 
                                 try {
                                   await axios.put(
-                                    `https://parkify-web-app-backend.onrender.com//api/free-parking/${spot._id}`,
+                                    `https://parkify-web-app-backend.onrender.com/api/free-parking/${spot._id}`,
                                     {
                                       hasSpots: true,
                                       availableSpots: (spot.availableSpots || 0) + 1,
@@ -655,7 +655,7 @@ const ParkingSpots = () => {
 
                                   try {
                                     await axios.put(
-                                      `https://parkify-web-app-backend.onrender.com//api/free-parking/${spot._id}`,
+                                      `https://parkify-web-app-backend.onrender.com/api/free-parking/${spot._id}`,
                                       {
                                         hasSpots: false,
                                         availableSpots: 0,
