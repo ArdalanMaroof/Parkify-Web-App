@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { authConnection } = require('../db');
+//const { authConnection } = require('../db');
 
 const ScoreSchema = new mongoose.Schema({
     email: String,       // To identify user
@@ -12,5 +12,5 @@ const ScoreSchema = new mongoose.Schema({
     }
 });
 
-const Score = authConnection.model('Score', ScoreSchema);
-module.exports = Score;
+//const Score = authConnection.model('Score', ScoreSchema);
+module.exports = mongoose.model('Score', ScoreSchema);

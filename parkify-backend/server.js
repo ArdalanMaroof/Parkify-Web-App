@@ -7,8 +7,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to DB
-mongoose.connect(process.env.MONGO_URI)
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error:", err));
 
@@ -27,19 +30,27 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/score", scoreRoutes);
 app.use('/api/confirmed-parking', confirmedParkingRoutes);
+app.use("/api", checkoutRoutes);
 
 console.log("scoreRoutes =", scoreRoutes);
 console.log("typeof scoreRoutes =", typeof scoreRoutes);
 console.log(" ConfirmedParking route mounted at /api/confirmed-parking");
-app.use("/api", checkoutRoutes);
+
 
 
 // GET all parking spots
 app.get("/api/free-parking", async (req, res) => {
   try {
-    const spots = await FreeParking.find({});
-    res.json(spots);
+    const spots = await FreeParking.find({}).lean();
+
+    // Remove duplicates server-side (as a safeguard)
+    const uniqueSpots = Array.from(
+      new Map(spots.map((spot) => [spot._id.toString(), spot])).values()
+    );
+    console.log('Returning unique spots:', uniqueSpots.length);
+    res.json(uniqueSpots);
   } catch (err) {
+    console.error('Error fetching free parking spots:', err);
     res.status(500).json({ error: "Server error" });
   }
 });
