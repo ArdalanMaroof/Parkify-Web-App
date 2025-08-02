@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from './component/BottomNav';
-//import { toast } from 'react-toastify';
-//import { ThemeContext } from '../context/ThemeContext';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { toast, ToastContainer } from 'react-toastify';
 import './Wallet.css';
 
