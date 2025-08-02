@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-//const { authConnection } = require('../db');
+
 
 const userSchema = new mongoose.Schema({
   //username: { type: String, required: true },
@@ -13,5 +13,4 @@ const userSchema = new mongoose.Schema({
   //balance: { type: Number, default: 0 }, // Use totalBalance instead of balance
 }, { timestamps: true});
 
-//const User = authConnection.model("User", UserSchema);
 module.exports = mongoose.model('User', userSchema);
