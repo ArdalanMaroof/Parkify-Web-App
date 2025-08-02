@@ -5,6 +5,8 @@ import BottomNav from './component/BottomNav';
 import { toast } from 'react-toastify';
 //import { ThemeContext } from '../context/ThemeContext';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { toast, ToastContainer } from 'react-toastify';
 import './Wallet.css';
 
 export default function Wallet() {
@@ -228,6 +230,30 @@ export default function Wallet() {
   };
 
   return (
+    <>
+
+        <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastStyle={{
+          backgroundColor: '#ffffff',
+          color: '#1a1a1a',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+        progressStyle={{
+          background: '#5c2ed6',
+        }}
+      />
     
     <div className="wallet-container">
       <div className="wallet-content">
@@ -285,5 +311,6 @@ export default function Wallet() {
       </div>
       <BottomNav />
     </div>
+    </>
   );
 }
