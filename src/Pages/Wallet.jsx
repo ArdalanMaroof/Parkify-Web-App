@@ -14,8 +14,6 @@ export default function Wallet() {
   const [paymentMethod, setPaymentMethod] = useState('email');
   const [paymentDetails, setPaymentDetails] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  //const [loading, setLoading] = useState(true);
-  //const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const POINT_TO_DOLLAR = 0.01;
